@@ -36,29 +36,29 @@ axes_grid = [fig.add_subplot(bottom_gs[r, c]) for r in range(3) for c in range(3
 
 # on to the plotting
 #top row is learning curve and evolution of normalized rt
-data['rt_normalized'] = (data['rt'] - data['rt'].mean()) / data['rt'].std() #z transofmr rt
+data['rt_normalized'] = data.groupby('subject')['rt'].transform(lambda x: (x - x.min()) / (x.max()-x.min()))
 data = TD.transform_contrast_to_ix(data) #add contrast index for plotting
 plot_learning_curve(data[data.instructions==1], ax=axes_top[0], 
                     color=COLORS['instructions'], 
                     label='Instructions',
                     x='trial', y='correct',
-                    only_easy=True, smooth=True, smooth_window=50)
+                    only_easy=False, smooth=True, smooth_window=50)
 plot_learning_curve(data[data.instructions==0], ax=axes_top[0],
                     color=COLORS['no_instructions'], 
                     label='No Instructions',
                     x='trial', y='correct',
-                    only_easy=True, smooth=True, smooth_window=50)
+                    only_easy=False, smooth=True, smooth_window=50)
 
 plot_learning_curve(data[data.instructions==1], ax=axes_top[1],
                     color=COLORS['instructions'],
                     label='Instructions',
                     x='trial', y='rt_normalized',
-                    only_easy=True, smooth=True, smooth_window=50)
+                    only_easy=False, smooth=True, smooth_window=50)
 plot_learning_curve(data[data.instructions==0], ax=axes_top[1],
                     color=COLORS['no_instructions'],
                     label='No Instructions',
                     x='trial', y='rt_normalized',
-                    only_easy=True, smooth=True, smooth_window=50)
+                    only_easy=False, smooth=True, smooth_window=50)
 
 for w in windows:
     trials_df = data[(data.trial>=w[0]) & (data.trial<w[1])]
@@ -87,6 +87,6 @@ for x in axes_grid:
     x.get_legend().remove()
 axes_top[0].get_legend().remove()
 #bottom row is psychometrics, median rt and variance of rt at different time points
-fig.savefig('../figures/figure4_high_contrast.png', dpi=300, bbox_inches='tight')
-fig.savefig('../figures/figure4_high_contrast.svg', dpi=300, bbox_inches='tight')
+fig.savefig('../figures/figure4_all_trials.png', dpi=300, bbox_inches='tight')
+fig.savefig('../figures/figure4_all_trials.svg', dpi=300, bbox_inches='tight')
 # %%
