@@ -100,15 +100,19 @@ x_time = np.arange(0, data['rt'].max(), 1/75)
 for key in ex_data_dict:
     d = ex_data_dict[key]['data']
 
-    early_wiggle = d[(d['choice']==1)&(d['feedbackType']==1)&(d['stimContrast']==1)].iloc[0]['cursorPosition'] # early trial
-    early_wiggle -= early_wiggle[0]
-    early_trial_n = d[(d['choice']==1)&(d['feedbackType']==1)].iloc[0]['trial']
-    late_wiggle = d[(d['choice']==1)&(d['feedbackType']==1)&(d['stimContrast']==1)].iloc[-10]['cursorPosition'] # late trial
-    late_wiggle -= late_wiggle[0]
-    late_trial_n = d[(d['choice']==1)&(d['feedbackType']==1)].iloc[-10]['trial']
+    for choice in [1, -1]:
+        early_wiggle_trial = d[(d['choice']==choice)&(d['feedbackType']==1)&(d['stimContrast']==1)].iloc[0]# early trial: left choice - correct - high contrast
+        early_wiggle = early_wiggle_trial['cursorPosition'] 
+        early_wiggle -= early_wiggle[0]
+        early_trial_n = early_wiggle_trial['trial']
 
-    ax['E'].plot(x_time[:len(early_wiggle)], early_wiggle, color=ex_data_dict[key]['col'], alpha=0.5, linewidth=2, label=f'trial {early_trial_n}')
-    ax['E'].plot(x_time[:len(late_wiggle)], late_wiggle, color=ex_data_dict[key]['col'], alpha=1, linewidth=2, label=f'trial {late_trial_n}')
+        late_wiggle_trial = d[(d['choice']==choice)&(d['feedbackType']==1)&(d['stimContrast']==1)].iloc[-10] # late trial: left choice - correct - high contrast
+        late_wiggle = late_wiggle_trial['cursorPosition']
+        late_wiggle -= late_wiggle[0]
+        late_trial_n = d[(d['choice']==1)&(d['feedbackType']==1)].iloc[-10]['trial']
+
+        ax['E'].plot(x_time[:len(early_wiggle)], early_wiggle, color=ex_data_dict[key]['col'], alpha=0.5, linewidth=2, label=f'trial {early_trial_n}')
+        ax['E'].plot(x_time[:len(late_wiggle)], late_wiggle, color=ex_data_dict[key]['col'], alpha=1, linewidth=2, label=f'trial {late_trial_n}')
 
 ax['E'].axhline(618, 0, x_time[-1], linestyle='--', color='grey', label='threshold left response')
 ax['E'].axhline(-618, 0, x_time[-1], linestyle='--', color='grey', label='threshold right response')
