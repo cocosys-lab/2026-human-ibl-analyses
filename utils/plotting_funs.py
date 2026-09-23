@@ -70,3 +70,21 @@ def plot_learning_curve(data, ax=None, color=None, label=None,
     elif y == 'rt_normalized':
         ax.set_ylabel('Normalized response time')
     return ax
+
+
+def plot_mean_cursor_trajectories(data, cursor_col, time_col, ax, color, time_window, xlabel):
+    for contrast in np.sort(data['stimContrast'].unique()):
+        for choice in [1,-1]:
+            selected_data = data[(data['stimContrast']==contrast)&(data['choice']==choice)]
+            cursor_data = np.vstack(selected_data[cursor_col].values)
+            mean_cursor = np.nanmean(cursor_data, axis=0)
+            if choice == 1:
+                ax.plot(data[time_col].iloc[0], mean_cursor, color=color, alpha=np.min([contrast+0.3, 1]), label=f'{contrast:.2f}')
+            else:
+                ax.plot(data[time_col].iloc[0], mean_cursor, color=color, alpha=np.min([contrast+0.3, 1]), label=None)
+    ax.legend(title='Stimulus contrast')
+    ax.set_xlim(time_window)
+    ax.set_ylim(-600, 600)
+    ax.set_xlabel(xlabel)
+    ax.set_ylabel('Cursor position (pix)')
+    return ax
