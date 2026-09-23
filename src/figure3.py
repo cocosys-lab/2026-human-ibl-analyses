@@ -26,7 +26,10 @@ data['rt'] = all_trials['response_times_from_stim']
 wiggle_data = pd.read_csv("../../misc-scripts/data/processed_data.csv")
 wiggles_as_array = [np.array(ast.literal_eval(row[1]['stimTrajectory'])) for row in wiggle_data.iterrows()]
 data['cursorPosition'] = wiggles_as_array
-data['cursorTime'] = [np.arange(0, data['rt'].max(), 1/75)[:len(row[1]['cursorPosition'])] for row in data.iterrows()] # FIXME: this is maybe hacky
+
+# screen refresh rate is 75Hz
+refresh_rate = 75 # get this from the data somehow
+data['cursorTime'] = [np.arange(0, data['rt'].max(), 1/refresh_rate)[:len(row[1]['cursorPosition'])] for row in data.iterrows()] # FIXME: this is maybe hacky
 
 data = TD.transform_contrast_to_ix(data) #add contrast index for plotting
 
@@ -89,9 +92,8 @@ plot_var_rt(data[data['instructions']==0], ax['D'], label='Non-instructed', colo
 ax['D'].get_legend().remove()
 
 ### MOUSE WIGGLES
-# screen refresh rate is 75Hz
-# what is the response threshold? 60??
-# ax['E'] - early and late wiggles from example sessions, with dotted line at threshold 'threshold left/right response'
+# what is the response threshold? 618
+# # ax['E'] - early and late wiggles from example sessions, with dotted line at threshold 'threshold left/right response'
 
 x_time = np.arange(0, data['rt'].max(), 1/75)
 
@@ -113,16 +115,18 @@ ax['E'].axhline(-618, 0, x_time[-1], linestyle='--', color='grey', label='thresh
 ax['E'].set_xlabel('time (s)')
 ax['E'].set_ylabel('cursor position (pix)')
 
-
-# plot all wiggles in session
+# ax['F'] - average wiggles for ins and no, left/right
+# for now, I am plotting all wiggles in example session
 for row in ex_session_no.iterrows():
-    plt.plot(row[1]['cursorTime'], row[1]['cursorPosition'], color=COLORS['no_instructions'], alpha=0.1)
+    ax['F'].plot(row[1]['cursorTime'], row[1]['cursorPosition']-row[1]['cursorPosition'][0], color=COLORS['no_instructions'], alpha=0.1)
 
 for row in ex_session_ins.iterrows():
-    plt.plot(row[1]['cursorTime'], row[1]['cursorPosition'], color=COLORS['instructions'], alpha=0.1)
+    ax['F'].plot(row[1]['cursorTime'], row[1]['cursorPosition']-row[1]['cursorPosition'][0], color=COLORS['instructions'], alpha=0.1)
 
-
-# ax['F'] - average wiggles for ins and no, left/right
+ax['F'].axhline(618, 0, x_time[-1], linestyle='--', color='grey', label='threshold left response')
+ax['F'].axhline(-618, 0, x_time[-1], linestyle='--', color='grey', label='threshold right response')
+ax['F'].set_xlabel('time (s)')
+ax['F'].set_ylabel('cursor position (pix)')
 
 fig.tight_layout()
 sns.despine(fig=fig)
