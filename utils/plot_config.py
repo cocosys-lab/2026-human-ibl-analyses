@@ -9,6 +9,8 @@ COLORS = {
     "right_block": "#EF6528",
     "instructions": "mediumturquoise",
     "no_instructions": "palevioletred",
+    'correct': 'darkgreen',
+    'incorrect': 'firebrick'
 }
 
 # Ordered palettes
