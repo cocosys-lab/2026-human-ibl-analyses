@@ -116,7 +116,7 @@ for key in ex_data_dict:
 
 ax['E'].axhline(618, 0, x_time[-1], linestyle='--', color='grey', label='threshold left response')
 ax['E'].axhline(-618, 0, x_time[-1], linestyle='--', color='grey', label='threshold right response')
-ax['E'].set_xlabel('time (s)')
+ax['E'].set_xlabel('time from stimulus onset (s)')
 ax['E'].set_ylabel('cursor position (pix)')
 ax['E'].set_title('Cursor movements on easy, correct trials')
 # TODO: add legend for early/late
@@ -131,7 +131,7 @@ for row in ex_session_ins.iterrows():
 
 ax['F'].axhline(618, 0, x_time[-1], linestyle='--', color='grey', label='threshold left response')
 ax['F'].axhline(-618, 0, x_time[-1], linestyle='--', color='grey', label='threshold right response')
-ax['F'].set_xlabel('time (s)')
+ax['F'].set_xlabel('time from stimulus onset (s)')
 ax['F'].set_ylabel('cursor position (pix)')
 
 fig.tight_layout()
