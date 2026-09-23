@@ -12,7 +12,7 @@ import pandas as pd
 import numpy as np
 import utils.transform_data as TD
 from matplotlib.gridspec import GridSpec
-from utils.plotting_funs import plot_median_rt, plot_var_rt
+from utils.plotting_funs import plot_median_rt, plot_var_rt, plot_mean_cursor_trajectories
 import utils.form_psychometrics as P
 
 apply_style()
@@ -25,14 +25,15 @@ data['rt'] = all_trials['response_times_from_stim']
 
 wiggle_data = pd.read_csv("../../misc-scripts/data/processed_data.csv")
 wiggles_as_array = [np.array(ast.literal_eval(row[1]['stimTrajectory'])) for row in wiggle_data.iterrows()]
-data['cursorPosition'] = wiggles_as_array
+wiggles_from_zero = [wiggle - wiggle[0] for wiggle in wiggles_as_array]
+data['cursorPosition'] = wiggles_from_zero
 
 # screen refresh rate is 75Hz
 refresh_rate = 75 # TODO: get this from the data somehow
 max_rt = data['rt'].max()
 data['cursorTime'] = [np.arange(0, max_rt, 1/refresh_rate)[:len(row[1]['cursorPosition'])] for row in data.iterrows()] # FIXME: this is maybe hacky
 data['timeToResp'] = [np.arange(0, max_rt+0.1, 1/refresh_rate) for row in data.iterrows()]
-data['timeFromResp'] = [np.arange(0, -max_rt-0.1,-1/refresh_rate) for row in data.iterrows()]
+data['timeFromResp'] = [np.arange(-max_rt-0.1, 0, 1/refresh_rate) for row in data.iterrows()]
 
 def _traj_fill_in_nans(trajectory, max_rt, refresh_rate, direction='from_stim'):
     x_time = np.arange(0, max_rt+0.1, 1/refresh_rate)
@@ -110,79 +111,17 @@ plot_var_rt(data[data['instructions']==0], ax['D'], label='Not instructed', colo
 ax['D'].get_legend().remove()
 
 ### MOUSE WIGGLES
-# what is the response threshold? 618
-# # ax['E'] - early and late wiggles from example sessions, with dotted line at threshold 'threshold left/right response'
-
-# x_time = np.arange(0, data['rt'].max(), 1/75)
-
-# for key in ex_data_dict:
-#     d = ex_data_dict[key]['data']
-
-#     for choice in [1, -1]:
-#         early_wiggle_trial = d[(d['choice']==choice)&(d['feedbackType']==1)&(d['stimContrast']==1)].iloc[0]# early trial: left choice - correct - high contrast
-#         early_wiggle = early_wiggle_trial['cursorPosition'] 
-#         early_wiggle -= early_wiggle[0]
-#         early_trial_n = early_wiggle_trial['trial']
-
-#         late_wiggle_trial = d[(d['choice']==choice)&(d['feedbackType']==1)&(d['stimContrast']==1)].iloc[-10] # late trial: left choice - correct - high contrast
-#         late_wiggle = late_wiggle_trial['cursorPosition']
-#         late_wiggle -= late_wiggle[0]
-#         late_trial_n = d[(d['choice']==1)&(d['feedbackType']==1)].iloc[-10]['trial']
-
-#         ax['E'].plot(x_time[:len(early_wiggle)], early_wiggle, color=ex_data_dict[key]['col'], alpha=0.5, linewidth=2, label=f'trial {early_trial_n}')
-#         ax['E'].plot(x_time[:len(late_wiggle)], late_wiggle, color=ex_data_dict[key]['col'], alpha=1, linewidth=2, label=f'trial {late_trial_n}')
-
-# ax['E'].axhline(618, 0, x_time[-1], linestyle='--', color='grey', label='threshold left response')
-# ax['E'].axhline(-618, 0, x_time[-1], linestyle='--', color='grey', label='threshold right response')
-# ax['E'].set_xlabel('time from stimulus onset (s)')
-# ax['E'].set_ylabel('cursor position (pix)')
-# ax['E'].set_title('Cursor movements on easy, correct trials')
-# # TODO: add legend for early/late
-
-# # ax['F'] - average wiggles for ins and no, left/right
-# # for now, I am plotting all wiggles in example session
-# for row in ex_session_no.iterrows():
-#     ax['F'].plot(row[1]['cursorTime'], row[1]['cursorPosition']-row[1]['cursorPosition'][0], color=COLORS['no_instructions'], alpha=0.1)
-
-# for row in ex_session_ins.iterrows():
-#     ax['F'].plot(row[1]['cursorTime'], row[1]['cursorPosition']-row[1]['cursorPosition'][0], color=COLORS['instructions'], alpha=0.1)
-
-# ax['F'].axhline(618, 0, x_time[-1], linestyle='--', color='grey', label='threshold left response')
-# ax['F'].axhline(-618, 0, x_time[-1], linestyle='--', color='grey', label='threshold right response')
-# ax['F'].set_xlabel('time from stimulus onset (s)')
-# ax['F'].set_ylabel('cursor position (pix)')
-
-# cursor_data = np.vstack(data['cursorPositionNan'].values)
-# cursor_data -= np.ones_like(cursor_data) * cursor_data[0,0]
-
-# data_no_instructions = data[data['instructions']==0]
-
-def plot_mean_cursor_trajectories_from_stim(data, cursor_col, time_col, ax, color, time_window, xlabel):
-    for contrast in np.sort(data['stimContrast'].unique()):
-        for choice in [1,-1]:
-            selected_data = data[(data['stimContrast']==contrast)&(data['choice']==choice)]
-            cursor_data = np.vstack(selected_data[cursor_col].values)
-            cursor_data -= np.ones_like(cursor_data) * cursor_data[0,0]
-
-            mean_cursor = np.nanmean(cursor_data, axis=0)
-            if choice == 1:
-                ax.plot(data[time_col].iloc[0], mean_cursor, color=color, alpha=np.min([contrast+0.3, 1]), label=f'{contrast:.2f}')
-            else:
-                ax.plot(data[time_col].iloc[0], mean_cursor, color=color, alpha=np.min([contrast+0.3, 1]), label=None)
-    ax.legend(title='Stimulus contrast')
-    ax.set_xlim(time_window)
-    ax.set_ylim(-600, 600)
-    ax.set_xlabel(xlabel)
-    ax.set_ylabel('Cursor position (pix)')
-
 data_instructions = data[data['instructions']==1]
 data_no_instructions = data[data['instructions']==0]
 
-plot_mean_cursor_trajectories_from_stim(data_instructions, 'cursorPositionNan', 'timeToResp', ax['E'], COLORS['instructions'], (0,3), 'Time from stimulus onset (s)')
-plot_mean_cursor_trajectories_from_stim(data_no_instructions, 'cursorPositionNan', 'timeToResp', ax['F'], COLORS['no_instructions'], (0,3), 'Time from stimulus onset (s)')
+plot_mean_cursor_trajectories(data_instructions, 'cursorPositionNan', 'timeToResp', ax['E'], COLORS['instructions'], (0,3), 'Time from stimulus onset (s)')
+plot_mean_cursor_trajectories(data_no_instructions, 'cursorPositionNan', 'timeToResp', ax['F'], COLORS['no_instructions'], (0,3), 'Time from stimulus onset (s)')
+ax['F'].get_legend().remove()
 
-plot_mean_cursor_trajectories_from_stim(data_instructions, 'nanCursorPosition', 'timeFromResp', ax['G'], COLORS['instructions'], (-3,0), 'Time from response (s)')
-plot_mean_cursor_trajectories_from_stim(data_no_instructions, 'nanCursorPosition', 'timeFromResp', ax['H'], COLORS['no_instructions'], (-3,0), 'Time from response (s)')
+plot_mean_cursor_trajectories(data_instructions, 'nanCursorPosition', 'timeFromResp', ax['G'], COLORS['instructions'], (-3,0), 'Time from response (s)')
+plot_mean_cursor_trajectories(data_no_instructions, 'nanCursorPosition', 'timeFromResp', ax['H'], COLORS['no_instructions'], (-3,0), 'Time from response (s)')
+ax['G'].get_legend().remove()
+ax['H'].get_legend().remove()
 
 fig.tight_layout()
 sns.despine(fig=fig)
