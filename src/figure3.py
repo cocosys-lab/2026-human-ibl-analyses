@@ -1,6 +1,7 @@
 #%% imports
 
 import sys
+import ast
 sys.path.append("..")
 from utils.plot_config import apply_style, COLORS
 import matplotlib.pyplot as plt
@@ -21,6 +22,11 @@ data = pd.read_csv("../../hivemind2025/data/processed_data.csv")
 data = TD.preprocess_trials(data)
 all_trials = pd.read_csv('../../hivemind2025/data/human_trials.csv')
 data['rt'] = all_trials['response_times_from_stim']
+
+wiggle_data = pd.read_csv("../../misc-scripts/data/processed_data.csv")
+wiggles_as_array = [np.array(ast.literal_eval(row[1]['stimTrajectory'])) for row in wiggle_data.iterrows()]
+data['cursorPosition'] = wiggles_as_array
+data['cursorTime'] = [np.arange(0, data['rt'].max(), 1/75)[:len(row[1]['cursorPosition'])] for row in data.iterrows()] # FIXME: this is maybe hacky
 
 data = TD.transform_contrast_to_ix(data) #add contrast index for plotting
 
@@ -64,7 +70,7 @@ for key, a in zip(ex_data_dict, [ax['A'], ax['B']]):
         ax=a,
         x='trial', y='rt', color='black', errorbar=None, label='rolling median RT')
 
-    a.set(xlabel="Trial number", ylabel="RT (s)", ylim=[0.01, 10])
+    a.set(xlabel="Trial number", ylabel="Response time (s)", ylim=[0.01, 10])
     a.set_yscale("log")
     a.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda y,pos:
         ('{{:.{:1d}f}}'.format(int(np.maximum(-np.log10(y),0)))).format(y)))
@@ -83,7 +89,39 @@ plot_var_rt(data[data['instructions']==0], ax['D'], label='Non-instructed', colo
 ax['D'].get_legend().remove()
 
 ### MOUSE WIGGLES
+# screen refresh rate is 75Hz
+# what is the response threshold? 60??
 # ax['E'] - early and late wiggles from example sessions, with dotted line at threshold 'threshold left/right response'
+
+x_time = np.arange(0, data['rt'].max(), 1/75)
+
+for key in ex_data_dict:
+    d = ex_data_dict[key]['data']
+
+    early_wiggle = d[(d['choice']==1)&(d['feedbackType']==1)&(d['stimContrast']==1)].iloc[0]['cursorPosition'] # early trial
+    early_wiggle -= early_wiggle[0]
+    early_trial_n = d[(d['choice']==1)&(d['feedbackType']==1)].iloc[0]['trial']
+    late_wiggle = d[(d['choice']==1)&(d['feedbackType']==1)&(d['stimContrast']==1)].iloc[-10]['cursorPosition'] # late trial
+    late_wiggle -= late_wiggle[0]
+    late_trial_n = d[(d['choice']==1)&(d['feedbackType']==1)].iloc[-10]['trial']
+
+    ax['E'].plot(x_time[:len(early_wiggle)], early_wiggle, color=ex_data_dict[key]['col'], alpha=0.5, linewidth=2, label=f'trial {early_trial_n}')
+    ax['E'].plot(x_time[:len(late_wiggle)], late_wiggle, color=ex_data_dict[key]['col'], alpha=1, linewidth=2, label=f'trial {late_trial_n}')
+
+ax['E'].axhline(618, 0, x_time[-1], linestyle='--', color='grey', label='threshold left response')
+ax['E'].axhline(-618, 0, x_time[-1], linestyle='--', color='grey', label='threshold right response')
+ax['E'].set_xlabel('time (s)')
+ax['E'].set_ylabel('cursor position (pix)')
+
+
+# plot all wiggles in session
+for row in ex_session_no.iterrows():
+    plt.plot(row[1]['cursorTime'], row[1]['cursorPosition'], color=COLORS['no_instructions'], alpha=0.1)
+
+for row in ex_session_ins.iterrows():
+    plt.plot(row[1]['cursorTime'], row[1]['cursorPosition'], color=COLORS['instructions'], alpha=0.1)
+
+
 # ax['F'] - average wiggles for ins and no, left/right
 
 fig.tight_layout()
