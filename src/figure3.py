@@ -22,6 +22,8 @@ data = TD.preprocess_trials(data)
 all_trials = pd.read_csv('../../hivemind2025/data/human_trials.csv')
 data['rt'] = all_trials['response_times_from_stim']
 
+data = TD.transform_contrast_to_ix(data) #add contrast index for plotting
+
 #%% select example sessions
 ex_session_num_no = '096'
 ex_session_num_ins = '094'
@@ -29,9 +31,9 @@ ex_session_num_ins = '094'
 ex_session_no = data[data['subject']==ex_session_num_no]
 ex_session_ins = data[data['subject']==ex_session_num_ins]
 
-data_dict = {'Instructions':{}, 'No Instructions':{}}
-data_dict['Instructions'] = {'data':ex_session_no, 'col':COLORS['instructions']}
-data_dict['No Instructions'] = {'data':ex_session_ins, 'col':COLORS['no_instructions']}
+ex_data_dict = {}
+ex_data_dict['Instructed'] = {'data':ex_session_no, 'col':COLORS['instructions']}
+ex_data_dict['Non-instructed'] = {'data':ex_session_ins, 'col':COLORS['no_instructions']}
 
 #%% create figure with proper dimensions
 
@@ -45,8 +47,8 @@ fig_layout = '''
 fig, ax = plt.subplot_mosaic(fig_layout, figsize=(10,12), height_ratios=[0.2, 0.2, 0.4, 0.4])
 
 ### EXAMPLE SESSIONS - ROLLING RT
-for key, a in zip(data_dict, [ax['A'], ax['B']]):
-    d = data_dict[key]['data']
+for key, a in zip(ex_data_dict, [ax['A'], ax['B']]):
+    d = ex_data_dict[key]['data']
 
     # rt scatterplot
     sns.scatterplot(data=d, ax=a, 
@@ -66,13 +68,23 @@ for key, a in zip(data_dict, [ax['A'], ax['B']]):
     a.set_yscale("log")
     a.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda y,pos:
         ('{{:.{:1d}f}}'.format(int(np.maximum(-np.log10(y),0)))).format(y)))
-    a.set_title(f'Example Session: {key}', color=data_dict[key]['col'])
+    a.set_title(f'Example session: {key}', color=ex_data_dict[key]['col'])
+    a.set_ylim(d['rt'].min()-0.01, d['rt'].max()+0.1)
 
 
 ### MEDIAN RT AND RT VARIANCE
 # check functions in utils
-
+plot_median_rt(data[data['instructions']==1], ax['C'], label='Instructed', color=COLORS['instructions'])
+plot_median_rt(data[data['instructions']==0], ax['C'], label='Non-instructed', color=COLORS['no_instructions'])
+plot_var_rt(data[data['instructions']==1], ax['D'], label='Instructed', color=COLORS['instructions'])
+plot_var_rt(data[data['instructions']==0], ax['D'], label='Non-instructed', color=COLORS['no_instructions'])
+ax['D'].get_legend().remove()
 
 ### MOUSE WIGGLES
 # ax['E'] - early and late wiggles from example sessions, with dotted line at threshold 'threshold left/right response'
 # ax['F'] - average wiggles for ins and no, left/right
+
+fig.tight_layout()
+sns.despine(fig=fig)
+
+# %%
