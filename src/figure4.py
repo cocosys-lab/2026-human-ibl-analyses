@@ -52,14 +52,14 @@ plot_learning_curve(data[data.instructions==0], ax=axes_top[0],
 plot_learning_curve(data[data.instructions==1], ax=axes_top[1],
                     color=COLORS['instructions'],
                     label='Instructions',
-                    x='trial', y='rt_normalized',
+                    x='trial', y='rt',
                     only_easy=False, smooth=True, smooth_window=50)
 plot_learning_curve(data[data.instructions==0], ax=axes_top[1],
                     color=COLORS['no_instructions'],
                     label='No Instructions',
-                    x='trial', y='rt_normalized',
+                    x='trial', y='rt',
                     only_easy=False, smooth=True, smooth_window=50)
-
+axes_top[1].set_ylabel('Response time (s)')
 for w in windows:
     trials_df = data[(data.trial>=w[0]) & (data.trial<w[1])]
     P.plot_panel_with_inset(
@@ -67,7 +67,7 @@ for w in windows:
         group_col="instructions", group_values=[1, 0],
         palette={1: "mediumturquoise", 0: "palevioletred"},
         labels={1: "Instructions", 0: "No instructions"},
-        title=f"Trials {w[0]}-{w[1]}",scatter=False
+        title=f"Trials {w[0]}-{w[1]}",scatter=True
     )
     axes_grid[windows.index(w)].set_ylabel("P(right) (%)")
     axes_grid[windows.index(w)].legend()
