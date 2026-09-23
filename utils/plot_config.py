@@ -3,6 +3,11 @@
 import matplotlib.pyplot as plt
 import seaborn as sns
 
+EXAMPLE_SESSIONS = {
+    'instructions':'094', 
+    'no_instructions': '027'
+}
+
 # Named colors, keyed for semantic use
 COLORS = {
     "left_block": "#5D3B92",

@@ -3,7 +3,7 @@
 import sys
 import ast
 sys.path.append("..")
-from utils.plot_config import apply_style, COLORS
+from utils.plot_config import apply_style, COLORS, EXAMPLE_SESSIONS
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 
@@ -23,10 +23,12 @@ data = TD.preprocess_trials(data)
 all_trials = pd.read_csv('../../hivemind2025/data/human_trials.csv')
 data['rt'] = all_trials['response_times_from_stim']
 
-wiggle_data = pd.read_csv("../../misc-scripts/data/processed_data.csv")
+wiggle_data = pd.read_csv("../../misc-scripts/data/processed_data.csv") # FIXME: need to get this from the data not from a separate file; don't delete wiggle column in prepro
 wiggles_as_array = [np.array(ast.literal_eval(row[1]['stimTrajectory'])) for row in wiggle_data.iterrows()]
 wiggles_from_zero = [wiggle - wiggle[0] for wiggle in wiggles_as_array]
 data['cursorPosition'] = wiggles_from_zero
+
+#%% prepare cursor data
 
 # screen refresh rate is 75Hz
 refresh_rate = 75 # TODO: get this from the data somehow
@@ -52,17 +54,15 @@ data['nanCursorPosition'] = [_traj_fill_in_nans(row[1]['cursorPosition'], max_rt
 data = TD.transform_contrast_to_ix(data) #add contrast index for plotting
 
 #%% select example sessions
-ex_session_num_no = '010'
-ex_session_num_ins = '094'
 
-ex_session_no = data[data['subject']==ex_session_num_no]
-ex_session_ins = data[data['subject']==ex_session_num_ins]
+ex_session_ins = data[data['subject']==EXAMPLE_SESSIONS['instructions']]
+ex_session_no = data[data['subject']==EXAMPLE_SESSIONS['no_instructions']]
 
 ex_data_dict = {}
-ex_data_dict['Instructed'] = {'data':ex_session_no, 'col':COLORS['instructions']}
-ex_data_dict['Not instructed'] = {'data':ex_session_ins, 'col':COLORS['no_instructions']}
+ex_data_dict['Instructed'] = {'data':ex_session_ins, 'col':COLORS['instructions']}
+ex_data_dict['Not instructed'] = {'data':ex_session_no, 'col':COLORS['no_instructions']}
 
-#%% create figure with proper dimensions
+#%% create figure
 
 fig_layout = '''
             AA
@@ -75,6 +75,7 @@ fig_layout = '''
 fig, ax = plt.subplot_mosaic(fig_layout, figsize=(10,12), height_ratios=[0.125, 0.125, 0.25, 0.25, 0.25])
 
 ### EXAMPLE SESSIONS - ROLLING RT
+ylims = (0.2, data['rt'].max()+0.1)
 for key, a in zip(ex_data_dict, [ax['A'], ax['B']]):
     d = ex_data_dict[key]['data']
 
@@ -97,7 +98,7 @@ for key, a in zip(ex_data_dict, [ax['A'], ax['B']]):
     a.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda y,pos:
         ('{{:.{:1d}f}}'.format(int(np.maximum(-np.log10(y),0)))).format(y)))
     a.set_title(f'Example session: {key}', color=ex_data_dict[key]['col'])
-    a.set_ylim(d['rt'].min()-0.01, d['rt'].max()+0.1)
+    a.set_ylim(ylims)
 handles, labels = ax['A'].get_legend_handles_labels()
 ax['A'].legend(handles, ['incorrect', 'correct', 'rolling median RT'])
 ax['B'].get_legend().remove()
