@@ -118,6 +118,8 @@ ax['E'].axhline(618, 0, x_time[-1], linestyle='--', color='grey', label='thresho
 ax['E'].axhline(-618, 0, x_time[-1], linestyle='--', color='grey', label='threshold right response')
 ax['E'].set_xlabel('time (s)')
 ax['E'].set_ylabel('cursor position (pix)')
+ax['E'].set_title('Cursor movements on easy, correct trials')
+# TODO: add legend for early/late
 
 # ax['F'] - average wiggles for ins and no, left/right
 # for now, I am plotting all wiggles in example session
