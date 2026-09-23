@@ -56,13 +56,13 @@ for key, a in zip(ex_data_dict, [ax['A'], ax['B']]):
         style='feedbackType', hue='feedbackType',
         palette={1.:COLORS['correct'], -1.:COLORS['incorrect']}, 
         markers={1.:'o', -1.:'X'}, s=10, edgecolors='face',
-        alpha=.5, legend=False)
+        alpha=.5, legend=True)
 
     # running median overlaid
     sns.lineplot(
         data=d[['trial', 'rt']].rolling(10).median(), 
         ax=a,
-        x='trial', y='rt', color='black', errorbar=None)
+        x='trial', y='rt', color='black', errorbar=None, label='rolling median RT')
 
     a.set(xlabel="Trial number", ylabel="RT (s)", ylim=[0.01, 10])
     a.set_yscale("log")
@@ -70,7 +70,9 @@ for key, a in zip(ex_data_dict, [ax['A'], ax['B']]):
         ('{{:.{:1d}f}}'.format(int(np.maximum(-np.log10(y),0)))).format(y)))
     a.set_title(f'Example session: {key}', color=ex_data_dict[key]['col'])
     a.set_ylim(d['rt'].min()-0.01, d['rt'].max()+0.1)
-
+handles, labels = ax['A'].get_legend_handles_labels()
+ax['A'].legend(handles, ['incorrect', 'correct', 'rolling median RT'])
+ax['B'].get_legend().remove()
 
 ### MEDIAN RT AND RT VARIANCE
 # check functions in utils
@@ -86,5 +88,8 @@ ax['D'].get_legend().remove()
 
 fig.tight_layout()
 sns.despine(fig=fig)
+
+fig.savefig('../figures/figure3.png', dpi=300, bbox_inches='tight')
+fig.savefig('../figures/figure3.svg', dpi=300, bbox_inches='tight')
 
 # %%
