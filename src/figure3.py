@@ -115,7 +115,7 @@ ax['D'].get_legend().remove()
 
 ### MOUSE WIGGLES
 # whole session of cursor movements
-# TODO: should this be only high contrast
+# INFO - to plot for only high contrast trials input contrast_level = 1.
 for key, a in zip(ex_data_dict, [ax['E'], ax['F']]):
     plot_all_session_trajectories(ex_data_dict[key]['data'], ('yellow', ex_data_dict[key]['col']), ax=a, contrast_level=None)
     a.set_title(f'Example session: {key}\nEasy trials', color=ex_data_dict[key]['col'])
