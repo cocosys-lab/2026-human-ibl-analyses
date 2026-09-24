@@ -3,12 +3,19 @@
 import matplotlib.pyplot as plt
 import seaborn as sns
 
+EXAMPLE_SESSIONS = {
+    'instructions':'094', 
+    'no_instructions': '010'
+}
+
 # Named colors, keyed for semantic use
 COLORS = {
     "left_block": "#5D3B92",
     "right_block": "#EF6528",
     "instructions": "mediumturquoise",
     "no_instructions": "palevioletred",
+    'correct': 'darkgreen',
+    'incorrect': 'firebrick'
 }
 
 # Ordered palettes
