@@ -77,8 +77,10 @@ def plot_mean_cursor_trajectories(data, cursor_col, time_col, ax, color, time_wi
         for choice in [1,-1]:
             selected_data = data[(data['stimContrast']==contrast)&(data['choice']==choice)]
             if selected_data.empty:
+                print(f'no trials for choice {choice} and contrast {contrast:.2f}')
                 continue
             cursor_data = np.vstack(selected_data[cursor_col].values)
+            mean_cursor = np.nanmean(cursor_data, axis=0)
             if choice == 1:
                 ax.plot(data[time_col].iloc[0], mean_cursor, color=color, alpha=np.min([contrast+0.3, 1]), label=f'{contrast:.2f}')
             else:
@@ -88,4 +90,34 @@ def plot_mean_cursor_trajectories(data, cursor_col, time_col, ax, color, time_wi
     ax.set_ylim(-600, 600)
     ax.set_xlabel(xlabel)
     ax.set_ylabel('Cursor position (pix)')
+    return ax
+
+
+def plot_all_session_trajectories(data, color_first_last, ax, highlight_first_last=True, contrast_level=None):
+    palette = sns.color_palette(f"blend:{color_first_last[0]},{color_first_last[1]}", n_colors=len(data))
+
+    if contrast_level:
+        data = data[data['stimContrast']==contrast_level]
+        if len(data) == 0:
+            raise(ValueError(f'No trials available at contrast {contrast_level}'))
+
+    for i, row in data.iterrows():
+        i-=data.index[0]
+        if len(row['cursorTime']) != len(row['cursorPosition']):
+            print(f'cursor data and time not aligned on trial {i}')
+            continue
+        ax.plot(row['cursorTime'], row['cursorPosition']-row['cursorPosition'][0], color=palette[i], alpha=0.2, label=None)
+    if highlight_first_last:
+        first_trial = data.iloc[0]
+        ax.plot(first_trial['cursorTime'], first_trial['cursorPosition'], color=palette[0], linewidth=3, label='first trial')
+        last_trial = data.iloc[-1]
+        ax.plot(last_trial['cursorTime'], last_trial['cursorPosition'], color=palette[-1], linewidth=3, label='last trial')
+        ax.legend()
+    ax.axhline(-600, 0, 3, linestyle='--', color='lightgrey', label=None)
+    ax.axhline(600, 0, 3, linestyle='--', color='lightgrey', label=None)
+    ax.set_xlim(0,3)
+    ax.set_ylim(-630,630)
+    ax.set_xlabel('Time from stimulus onset (s)')
+    ax.set_ylabel('Cursor position (pix)')
+
     return ax

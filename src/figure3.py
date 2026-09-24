@@ -6,19 +6,21 @@ sys.path.append("..")
 from utils.plot_config import apply_style, COLORS, EXAMPLE_SESSIONS
 import matplotlib.pyplot as plt
 import matplotlib as mpl
+from matplotlib.colors import ListedColormap
 
 import seaborn as sns
 import pandas as pd
 import numpy as np
 import utils.transform_data as TD
 from matplotlib.gridspec import GridSpec
-from utils.plotting_funs import plot_median_rt, plot_var_rt, plot_mean_cursor_trajectories
+from utils.plotting_funs import plot_median_rt, plot_var_rt, plot_mean_cursor_trajectories, plot_all_session_trajectories
 import utils.form_psychometrics as P
 
 apply_style()
 
 #%% import data
 data = pd.read_csv("../../hivemind2025/data/processed_data.csv")
+data = TD.preprocess_trials(data)
 all_trials = pd.read_csv('../../hivemind2025/data/human_trials.csv')
 data['rt'] = all_trials['response_times_from_stim']
 
@@ -26,7 +28,6 @@ wiggle_data = pd.read_csv("../../misc-scripts/data/processed_data.csv") # FIXME:
 wiggles_as_array = [np.array(ast.literal_eval(row[1]['stimTrajectory'])) for row in wiggle_data.iterrows()]
 wiggles_from_zero = [wiggle - wiggle[0] for wiggle in wiggles_as_array]
 data['cursorPosition'] = wiggles_from_zero
-data = TD.preprocess_trials(data)
 
 #%% prepare cursor data
 
@@ -70,9 +71,10 @@ fig_layout = '''
             CD
             EF
             GH
+            IJ
             '''
 
-fig, ax = plt.subplot_mosaic(fig_layout, figsize=(10,12), height_ratios=[0.125, 0.125, 0.25, 0.25, 0.25])
+fig, ax = plt.subplot_mosaic(fig_layout, figsize=(10,14), height_ratios=[0.125, 0.125, 0.25, 0.25, 0.25, 0.25])
 
 ### EXAMPLE SESSIONS - ROLLING RT
 ylims = (0.2, data['rt'].max()+0.1)
@@ -112,17 +114,27 @@ plot_var_rt(data[data['instructions']==0], ax['D'], label='Not instructed', colo
 ax['D'].get_legend().remove()
 
 ### MOUSE WIGGLES
+# whole session of cursor movements
+# TODO: should this be only high contrast
+for key, a in zip(ex_data_dict, [ax['E'], ax['F']]):
+    plot_all_session_trajectories(ex_data_dict[key]['data'], ('yellow', ex_data_dict[key]['col']), ax=a)
+    a.set_title(f'Example session: {key}\nAll responses', color=ex_data_dict[key]['col'])
+
+# from stimulus
 data_instructions = data[data['instructions']==1]
 data_no_instructions = data[data['instructions']==0]
 
-plot_mean_cursor_trajectories(data_instructions, 'cursorPositionNan', 'timeToResp', ax['E'], COLORS['instructions'], (0,3), 'Time from stimulus onset (s)')
-plot_mean_cursor_trajectories(data_no_instructions, 'cursorPositionNan', 'timeToResp', ax['F'], COLORS['no_instructions'], (0,3), 'Time from stimulus onset (s)')
-ax['F'].get_legend().remove()
-
-plot_mean_cursor_trajectories(data_instructions, 'nanCursorPosition', 'timeFromResp', ax['G'], COLORS['instructions'], (-3,0), 'Time from response (s)')
-plot_mean_cursor_trajectories(data_no_instructions, 'nanCursorPosition', 'timeFromResp', ax['H'], COLORS['no_instructions'], (-3,0), 'Time from response (s)')
-ax['G'].get_legend().remove()
+plot_mean_cursor_trajectories(data_instructions, 'cursorPositionNan', 'timeToResp', ax['G'], COLORS['instructions'], (0,3), 'Time from stimulus onset (s)')
+plot_mean_cursor_trajectories(data_no_instructions, 'cursorPositionNan', 'timeToResp', ax['H'], COLORS['no_instructions'], (0,3), 'Time from stimulus onset (s)')
 ax['H'].get_legend().remove()
+ax['G'].set_title(f'All sessions: Instructed', color=COLORS['instructions'])
+ax['H'].set_title(f'All sessions: Not instructed', color=COLORS['no_instructions'])
+
+# from response
+plot_mean_cursor_trajectories(data_instructions, 'nanCursorPosition', 'timeFromResp', ax['I'], COLORS['instructions'], (-3,0), 'Time from response (s)')
+plot_mean_cursor_trajectories(data_no_instructions, 'nanCursorPosition', 'timeFromResp', ax['J'], COLORS['no_instructions'], (-3,0), 'Time from response (s)')
+ax['I'].get_legend().remove()
+ax['J'].get_legend().remove()
 
 fig.tight_layout()
 sns.despine(fig=fig)

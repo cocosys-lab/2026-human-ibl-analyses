@@ -5,7 +5,7 @@ import seaborn as sns
 
 EXAMPLE_SESSIONS = {
     'instructions':'094', 
-    'no_instructions': '027'
+    'no_instructions': '010'
 }
 
 # Named colors, keyed for semantic use
