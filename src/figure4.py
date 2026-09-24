@@ -40,23 +40,23 @@ data['rt_normalized'] = data.groupby('subject')['rt'].transform(lambda x: (x - x
 data = TD.transform_contrast_to_ix(data) #add contrast index for plotting
 plot_learning_curve(data[data.instructions==1], ax=axes_top[0], 
                     color=COLORS['instructions'], 
-                    label='Instructions',
+                    label='Instructions', errorbar='ci',
                     x='trial', y='correct',
                     only_easy=False, smooth=True, smooth_window=50)
 plot_learning_curve(data[data.instructions==0], ax=axes_top[0],
                     color=COLORS['no_instructions'], 
-                    label='No Instructions',
+                    label='No Instructions', errorbar='ci',
                     x='trial', y='correct',
                     only_easy=False, smooth=True, smooth_window=50)
 
 plot_learning_curve(data[data.instructions==1], ax=axes_top[1],
                     color=COLORS['instructions'],
-                    label='Instructions',
+                    label='Instructions', errorbar='ci',
                     x='trial', y='rt',
                     only_easy=False, smooth=True, smooth_window=50)
 plot_learning_curve(data[data.instructions==0], ax=axes_top[1],
                     color=COLORS['no_instructions'],
-                    label='No Instructions',
+                    label='No Instructions', errorbar='ci',
                     x='trial', y='rt',
                     only_easy=False, smooth=True, smooth_window=50)
 axes_top[1].set_ylabel('Response time (s)')
@@ -67,18 +67,30 @@ for w in windows:
         group_col="instructions", group_values=[1, 0],
         palette={1: "mediumturquoise", 0: "palevioletred"},
         labels={1: "Instructions", 0: "No instructions"},
-        title=f"Trials {w[0]}-{w[1]}",scatter=True
+        title=f"Trials {w[0]}-{w[1]}",scatter=False
     )
+    grouped_df = trials_df.groupby(['subject','signed_contrast', 'instructions']).agg({'choice_right':'mean'}).reset_index()
+    grouped_df['choice_right'] = grouped_df['choice_right']*100
+    sns.lineplot(data=grouped_df[grouped_df.instructions==1], x='signed_contrast', y='choice_right',
+                 ax=axes_grid[windows.index(w)], color='mediumturquoise', label='Instructed', errorbar='ci',
+                 err_style='bars', linewidth=0, marker='o', markersize=5)
+    sns.lineplot(data=grouped_df[grouped_df.instructions==0], x='signed_contrast', y='choice_right',
+                 ax=axes_grid[windows.index(w)], color='palevioletred', label='Non-Instructed', errorbar='ci',
+                 err_style='bars', linewidth=0, marker='o', markersize=5)
     axes_grid[windows.index(w)].set_ylabel("P(right) (%)")
     axes_grid[windows.index(w)].legend()
     
-    plot_median_rt(trials_df[trials_df.instructions==1],ax=axes_grid[3+windows.index(w)], color='mediumturquoise', label='Instructed')
-    plot_median_rt(trials_df[trials_df.instructions==0],ax=axes_grid[3+windows.index(w)], color='palevioletred', label='Non-Instructed')
+    plot_median_rt(trials_df[trials_df.instructions==1],ax=axes_grid[3+windows.index(w)], 
+                   color='mediumturquoise', label='Instructed', errorbar='ci')
+    plot_median_rt(trials_df[trials_df.instructions==0],ax=axes_grid[3+windows.index(w)], 
+                   color='palevioletred', label='Non-Instructed', errorbar='ci')
     axes_grid[3+windows.index(w)].set_ylabel("Median RT (s)")
     axes_grid[3+windows.index(w)].legend()
     
-    plot_var_rt(trials_df[trials_df.instructions==1],ax=axes_grid[6+windows.index(w)], color='mediumturquoise', label='Instructed')
-    plot_var_rt(trials_df[trials_df.instructions==0],ax=axes_grid[6+windows.index(w)], color='palevioletred', label='Non-Instructed')
+    plot_var_rt(trials_df[trials_df.instructions==1],ax=axes_grid[6+windows.index(w)], 
+                color='mediumturquoise', label='Instructed', errorbar='ci')
+    plot_var_rt(trials_df[trials_df.instructions==0],ax=axes_grid[6+windows.index(w)], 
+                color='palevioletred', label='Non-Instructed', errorbar='ci')
     axes_grid[6+windows.index(w)].set_ylabel("Variance RT (s^2)")
     axes_grid[6+windows.index(w)].legend()
     

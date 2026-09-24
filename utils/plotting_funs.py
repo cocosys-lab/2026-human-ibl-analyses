@@ -3,7 +3,8 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 
 def plot_median_rt(data, ax=None, color=None, label=None,
-                   x='contrast_ix', y='rt', groupby=['subject','contrast_ix']):
+                   x='contrast_ix', y='rt', groupby=['subject','contrast_ix'],
+                   errorbar='se'):
     if ax is None:
         fig, ax = plt.subplots(figsize=(6,4))
     if color is None:
@@ -11,7 +12,7 @@ def plot_median_rt(data, ax=None, color=None, label=None,
     if label is None:
         label = 'All subjects'
     dat = data.groupby(['subject','contrast_ix']).agg({y: 'median'}).reset_index()
-    sns.lineplot(data=dat,x=x,y=y,ax=ax,errorbar='se',
+    sns.lineplot(data=dat,x=x,y=y,ax=ax,errorbar=errorbar,
                  color=color, label=label)
     unique_contrast_ixs = np.unique(data.contrast_ix)
     unique_signed_contrasts = np.unique(data.signed_contrast)
@@ -21,7 +22,8 @@ def plot_median_rt(data, ax=None, color=None, label=None,
     ax.set_ylabel('Median response time (s)')
     
 def plot_var_rt(data, ax=None, color=None, label=None,
-                x='contrast_ix', y='rt', groupby=['subject','contrast_ix']):
+                x='contrast_ix', y='rt', groupby=['subject','contrast_ix'],
+                errorbar='se'):
     if ax is None:
         fig, ax = plt.subplots(figsize=(6,4))
     if color is None:
@@ -29,7 +31,7 @@ def plot_var_rt(data, ax=None, color=None, label=None,
     if label is None:
         label = 'All subjects'
     dat = data.groupby(['subject','contrast_ix']).agg({y: 'var'}).reset_index()
-    sns.lineplot(data=dat,x=x,y=y,ax=ax,errorbar='se',
+    sns.lineplot(data=dat,x=x,y=y,ax=ax,errorbar=errorbar,
                  color=color, label=label)
     unique_contrast_ixs = np.unique(data.contrast_ix)
     unique_signed_contrasts = np.unique(data.signed_contrast)
@@ -40,7 +42,7 @@ def plot_var_rt(data, ax=None, color=None, label=None,
         
 def plot_learning_curve(data, ax=None, color=None, label=None,
                          x='trial', y='correct', groupby=['subject', 'trial'],
-                         x_max=600, only_easy=False,
+                         x_max=600, only_easy=False, errorbar='se',
                          smooth=False, smooth_window=10):
     data = data[data[x] < x_max].copy()
     if only_easy:
@@ -62,7 +64,7 @@ def plot_learning_curve(data, ax=None, color=None, label=None,
             .transform(lambda s: s.rolling(smooth_window, min_periods=1, center=True).mean())
         )
  
-    sns.lineplot(data=data, x=x, y=y, ax=ax, errorbar='se',
+    sns.lineplot(data=data, x=x, y=y, ax=ax, errorbar=errorbar,
                  color=color, label=label)
     ax.set_xlabel('Trial number')
     if y == 'correct':
