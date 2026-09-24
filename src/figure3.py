@@ -18,6 +18,8 @@ import utils.form_psychometrics as P
 
 apply_style()
 
+contrast_level = 1. # or None for all contrasts in wiggle plot
+
 #%% import data
 data = pd.read_csv("../../hivemind2025/data/processed_data.csv")
 data = TD.preprocess_trials(data)
@@ -71,10 +73,9 @@ fig_layout = '''
             CD
             EF
             GH
-            IJ
             '''
 
-fig, ax = plt.subplot_mosaic(fig_layout, figsize=(10,14), height_ratios=[0.125, 0.125, 0.25, 0.25, 0.25, 0.25])
+fig, ax = plt.subplot_mosaic(fig_layout, figsize=(10,12), height_ratios=[0.125, 0.125, 0.25, 0.25, 0.25])
 
 ### EXAMPLE SESSIONS - ROLLING RT
 ylims = (0.2, data['rt'].max()+0.1)
@@ -105,41 +106,49 @@ handles, labels = ax['A'].get_legend_handles_labels()
 ax['A'].legend(handles, ['incorrect', 'correct', 'rolling median RT'])
 ax['B'].get_legend().remove()
 
-### MEDIAN RT AND RT VARIANCE
-# check functions in utils
-plot_median_rt(data[data['instructions']==1], ax['C'], label='Instructed', color=COLORS['instructions'])
-plot_median_rt(data[data['instructions']==0], ax['C'], label='Non-instructed', color=COLORS['no_instructions'])
-plot_var_rt(data[data['instructions']==1], ax['D'], label='Instructed', color=COLORS['instructions'])
-plot_var_rt(data[data['instructions']==0], ax['D'], label='Not instructed', color=COLORS['no_instructions'])
-ax['D'].get_legend().remove()
-
 ### MOUSE WIGGLES
 # whole session of cursor movements
-# INFO - to plot for only high contrast trials input contrast_level = 1.
-for key, a in zip(ex_data_dict, [ax['E'], ax['F']]):
-    plot_all_session_trajectories(ex_data_dict[key]['data'], ('yellow', ex_data_dict[key]['col']), ax=a, contrast_level=None)
-    a.set_title(f'Example session: {key}\nEasy trials', color=ex_data_dict[key]['col'])
+for key, a in zip(ex_data_dict, [ax['C'], ax['D']]):
+    plot_all_session_trajectories(ex_data_dict[key]['data'], ('yellow', ex_data_dict[key]['col']), ax=a, contrast_level=contrast_level)
+    if contrast_level:
+        a.set_title(f'Example session: {key}\nEasy trials', color=ex_data_dict[key]['col'])
+    else:
+        a.set_title(f'Example session: {key}', color=ex_data_dict[key]['col'])
 
 # from stimulus
 data_instructions = data[data['instructions']==1]
 data_no_instructions = data[data['instructions']==0]
 
-plot_mean_cursor_trajectories(data_instructions, 'cursorPositionNan', 'timeToResp', ax['G'], COLORS['instructions'], (0,3), 'Time from stimulus onset (s)')
-plot_mean_cursor_trajectories(data_no_instructions, 'cursorPositionNan', 'timeToResp', ax['H'], COLORS['no_instructions'], (0,3), 'Time from stimulus onset (s)')
-ax['H'].get_legend().remove()
-ax['G'].set_title(f'All sessions: Instructed', color=COLORS['instructions'])
-ax['H'].set_title(f'All sessions: Not instructed', color=COLORS['no_instructions'])
+plot_mean_cursor_trajectories(data_instructions, 'cursorPositionNan', 'timeToResp', ax['E'], COLORS['instructions'], (0,3), 'Time from stimulus onset (s)')
+plot_mean_cursor_trajectories(data_no_instructions, 'cursorPositionNan', 'timeToResp', ax['F'], COLORS['no_instructions'], (0,3), 'Time from stimulus onset (s)')
+ax['E'].get_legend().set(loc='center right')
+ax['F'].get_legend().remove()
+ax['E'].set_title(f'All sessions: Instructed', color=COLORS['instructions'])
+ax['F'].set_title(f'All sessions: Not instructed', color=COLORS['no_instructions'])
 
-# from response
-plot_mean_cursor_trajectories(data_instructions, 'nanCursorPosition', 'timeFromResp', ax['I'], COLORS['instructions'], (-3,0), 'Time from response (s)')
-plot_mean_cursor_trajectories(data_no_instructions, 'nanCursorPosition', 'timeFromResp', ax['J'], COLORS['no_instructions'], (-3,0), 'Time from response (s)')
-ax['I'].get_legend().remove()
-ax['J'].get_legend().remove()
+# # from response
+# plot_mean_cursor_trajectories(data_instructions, 'nanCursorPosition', 'timeFromResp', ax['I'], COLORS['instructions'], (-0.5,0), 'Time from response (s)')
+# plot_mean_cursor_trajectories(data_no_instructions, 'nanCursorPosition', 'timeFromResp', ax['J'], COLORS['no_instructions'], (-0.5,0), 'Time from response (s)')
+# ax['I'].get_legend().remove()
+# ax['J'].get_legend().remove()
+
+### MEDIAN RT AND RT VARIANCE
+# check functions in utils
+plot_median_rt(data[data['instructions']==1], ax['G'], label='Instructed', color=COLORS['instructions'])
+plot_median_rt(data[data['instructions']==0], ax['G'], label='Non-instructed', color=COLORS['no_instructions'])
+plot_var_rt(data[data['instructions']==1], ax['H'], label='Instructed', color=COLORS['instructions'])
+plot_var_rt(data[data['instructions']==0], ax['H'], label='Not instructed', color=COLORS['no_instructions'])
+ax['H'].get_legend().remove()
+
 
 fig.tight_layout()
 sns.despine(fig=fig)
 
-fig.savefig('../figures/figure3_alltrials.png', dpi=300, bbox_inches='tight')
-fig.savefig('../figures/figure3_alltrials.svg', dpi=300, bbox_inches='tight')
+if contrast_level:
+    fig.savefig(f'../figures/figure3_highcon.png', dpi=300, bbox_inches='tight')
+    fig.savefig(f'../figures/figure3_highcon.svg', dpi=300, bbox_inches='tight')
+else:
+    fig.savefig('../figures/figure3_alltrials.png', dpi=300, bbox_inches='tight')
+    fig.savefig('../figures/figure3_alltrials.svg', dpi=300, bbox_inches='tight')
 
 # %%
