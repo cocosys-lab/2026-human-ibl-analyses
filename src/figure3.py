@@ -3,7 +3,7 @@
 import sys
 import ast
 sys.path.append("..")
-from utils.plot_config import apply_style, COLORS, EXAMPLE_SESSIONS
+from utils.plot_config import apply_style, COLORS, CONTRAST_PALETTE, EXAMPLE_SESSIONS
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 from matplotlib.colors import ListedColormap
@@ -100,31 +100,42 @@ for key, a in zip(ex_data_dict, [ax['A'], ax['B']]):
     a.set_yscale("log")
     a.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda y,pos:
         ('{{:.{:1d}f}}'.format(int(np.maximum(-np.log10(y),0)))).format(y)))
-    a.set_title(f'Example session: {key}', color=ex_data_dict[key]['col'])
+    if key == 'Instructed':
+        key2 = 'instructions'
+    else:
+        key2 = 'no_instructions'
+    a.set_title(f'Participant {EXAMPLE_SESSIONS[key2]}: {key}', color=ex_data_dict[key]['col'])
     a.set_ylim(ylims)
 handles, labels = ax['A'].get_legend_handles_labels()
-ax['A'].legend(handles, ['incorrect', 'correct', 'rolling median RT'])
+legend_a = ax['A'].legend(handles, ['incorrect', 'correct', 'rolling median RT'], bbox_to_anchor=[1, -0.3])
+legend_a.set_in_layout(False)
 ax['B'].get_legend().remove()
 
 ### MOUSE WIGGLES
 # whole session of cursor movements
 for key, a in zip(ex_data_dict, [ax['C'], ax['D']]):
-    plot_all_session_trajectories(ex_data_dict[key]['data'], ('yellow', ex_data_dict[key]['col']), ax=a, contrast_level=contrast_level)
-    if contrast_level:
-        a.set_title(f'Example session: {key}\nEasy trials', color=ex_data_dict[key]['col'])
+    plot_all_session_trajectories(ex_data_dict[key]['data'], (COLORS['cursor_early_trial'], COLORS['cursor_late_trial']), ax=a, contrast_level=contrast_level)
+    if key == 'Instructed':
+        key2 = 'instructions'
     else:
-        a.set_title(f'Example session: {key}', color=ex_data_dict[key]['col'])
+        key2 = 'no_instructions'
+    a.set_title(f'Participant {EXAMPLE_SESSIONS[key2]}: {key}', color=ex_data_dict[key]['col'])
+    if contrast_level:
+        a.set_title(f'Participant {EXAMPLE_SESSIONS[key2]}: {key}\nEasy trials', color=ex_data_dict[key]['col'])
+    else:
+        a.set_title(f'Participant {EXAMPLE_SESSIONS[key2]}: {key}', color=ex_data_dict[key]['col'])
+ax['D'].get_legend().remove()
 
 # from stimulus
 data_instructions = data[data['instructions']==1]
 data_no_instructions = data[data['instructions']==0]
 
-plot_mean_cursor_trajectories(data_instructions, 'cursorPositionNan', 'timeToResp', ax['E'], COLORS['instructions'], (0,3), 'Time from stimulus onset (s)')
-plot_mean_cursor_trajectories(data_no_instructions, 'cursorPositionNan', 'timeToResp', ax['F'], COLORS['no_instructions'], (0,3), 'Time from stimulus onset (s)')
-ax['E'].get_legend().set(loc='center right')
-ax['F'].get_legend().remove()
-ax['E'].set_title(f'All sessions: Instructed', color=COLORS['instructions'])
-ax['F'].set_title(f'All sessions: Not instructed', color=COLORS['no_instructions'])
+plot_mean_cursor_trajectories(data_instructions, 'cursorPositionNan', 'timeToResp', ax['E'], CONTRAST_PALETTE, (0,3), 'Time from stimulus onset (s)')
+plot_mean_cursor_trajectories(data_no_instructions, 'cursorPositionNan', 'timeToResp', ax['F'], CONTRAST_PALETTE, (0,3), 'Time from stimulus onset (s)')
+ax['E'].get_legend().remove()
+ax['F'].get_legend().set(loc='center left', bbox_to_anchor=[1.02, 0.5])
+ax['E'].set_title(f'All instructed participants', color=COLORS['instructions'])
+ax['F'].set_title(f'All not instructed participants', color=COLORS['no_instructions'])
 
 # # from response
 # plot_mean_cursor_trajectories(data_instructions, 'nanCursorPosition', 'timeFromResp', ax['I'], COLORS['instructions'], (-0.5,0), 'Time from response (s)')
@@ -140,8 +151,17 @@ plot_var_rt(data[data['instructions']==1], ax['H'], label='Instructed', color=CO
 plot_var_rt(data[data['instructions']==0], ax['H'], label='Not instructed', color=COLORS['no_instructions'])
 ax['H'].get_legend().remove()
 
-
 fig.tight_layout()
+
+# make only the E/F row narrower to leave space for the legend on the right
+_e_pos = ax['E'].get_position()
+_f_pos = ax['F'].get_position()
+_gap = _f_pos.x0 - _e_pos.x1
+_shrink = 0.12
+_scale = ((_e_pos.width + _f_pos.width) - _shrink) / (_e_pos.width + _f_pos.width)
+ax['E'].set_position([_e_pos.x0, _e_pos.y0, _e_pos.width * _scale, _e_pos.height])
+ax['F'].set_position([_e_pos.x0 + (_e_pos.width * _scale) + _gap, _f_pos.y0, _f_pos.width * _scale, _f_pos.height])
+
 sns.despine(fig=fig)
 
 if contrast_level:
