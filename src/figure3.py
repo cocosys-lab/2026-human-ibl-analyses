@@ -19,7 +19,6 @@ apply_style()
 
 #%% import data
 data = pd.read_csv("../../hivemind2025/data/processed_data.csv")
-data = TD.preprocess_trials(data)
 all_trials = pd.read_csv('../../hivemind2025/data/human_trials.csv')
 data['rt'] = all_trials['response_times_from_stim']
 
@@ -27,6 +26,7 @@ wiggle_data = pd.read_csv("../../misc-scripts/data/processed_data.csv") # FIXME:
 wiggles_as_array = [np.array(ast.literal_eval(row[1]['stimTrajectory'])) for row in wiggle_data.iterrows()]
 wiggles_from_zero = [wiggle - wiggle[0] for wiggle in wiggles_as_array]
 data['cursorPosition'] = wiggles_from_zero
+data = TD.preprocess_trials(data)
 
 #%% prepare cursor data
 
