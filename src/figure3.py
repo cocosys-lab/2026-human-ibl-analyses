@@ -117,8 +117,8 @@ ax['D'].get_legend().remove()
 # whole session of cursor movements
 # TODO: should this be only high contrast
 for key, a in zip(ex_data_dict, [ax['E'], ax['F']]):
-    plot_all_session_trajectories(ex_data_dict[key]['data'], ('yellow', ex_data_dict[key]['col']), ax=a)
-    a.set_title(f'Example session: {key}\nAll responses', color=ex_data_dict[key]['col'])
+    plot_all_session_trajectories(ex_data_dict[key]['data'], ('yellow', ex_data_dict[key]['col']), ax=a, contrast_level=None)
+    a.set_title(f'Example session: {key}\nEasy trials', color=ex_data_dict[key]['col'])
 
 # from stimulus
 data_instructions = data[data['instructions']==1]
@@ -139,7 +139,7 @@ ax['J'].get_legend().remove()
 fig.tight_layout()
 sns.despine(fig=fig)
 
-fig.savefig('../figures/figure3.png', dpi=300, bbox_inches='tight')
-fig.savefig('../figures/figure3.svg', dpi=300, bbox_inches='tight')
+fig.savefig('../figures/figure3_alltrials.png', dpi=300, bbox_inches='tight')
+fig.savefig('../figures/figure3_alltrials.svg', dpi=300, bbox_inches='tight')
 
 # %%
