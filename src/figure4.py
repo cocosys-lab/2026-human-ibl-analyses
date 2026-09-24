@@ -40,23 +40,23 @@ data['rt_normalized'] = data.groupby('subject')['rt'].transform(lambda x: (x - x
 data = TD.transform_contrast_to_ix(data) #add contrast index for plotting
 plot_learning_curve(data[data.instructions==1], ax=axes_top[0], 
                     color=COLORS['instructions'], 
-                    label='Instructions', errorbar='ci',
+                    label='Instructed', errorbar='ci',
                     x='trial', y='correct',
                     only_easy=False, smooth=True, smooth_window=50)
 plot_learning_curve(data[data.instructions==0], ax=axes_top[0],
                     color=COLORS['no_instructions'], 
-                    label='No Instructions', errorbar='ci',
+                    label='Not Instructed', errorbar='ci',
                     x='trial', y='correct',
                     only_easy=False, smooth=True, smooth_window=50)
 
 plot_learning_curve(data[data.instructions==1], ax=axes_top[1],
                     color=COLORS['instructions'],
-                    label='Instructions', errorbar='ci',
+                    label='Instructed', errorbar='ci',
                     x='trial', y='rt',
                     only_easy=False, smooth=True, smooth_window=50)
 plot_learning_curve(data[data.instructions==0], ax=axes_top[1],
                     color=COLORS['no_instructions'],
-                    label='No Instructions', errorbar='ci',
+                    label='Not Instructed', errorbar='ci',
                     x='trial', y='rt',
                     only_easy=False, smooth=True, smooth_window=50)
 axes_top[1].set_ylabel('Response time (s)')
@@ -66,7 +66,7 @@ for w in windows:
         axes_grid[windows.index(w)], trials_df,
         group_col="instructions", group_values=[1, 0],
         palette={1: "mediumturquoise", 0: "palevioletred"},
-        labels={1: "Instructions", 0: "No instructions"},
+        labels={1: "Instructed", 0: "Not Instructed"},
         title=f"Trials {w[0]}-{w[1]}",scatter=False
     )
     grouped_df = trials_df.groupby(['subject','signed_contrast', 'instructions']).agg({'choice_right':'mean'}).reset_index()
@@ -83,14 +83,14 @@ for w in windows:
     plot_median_rt(trials_df[trials_df.instructions==1],ax=axes_grid[3+windows.index(w)], 
                    color='mediumturquoise', label='Instructed', errorbar='ci')
     plot_median_rt(trials_df[trials_df.instructions==0],ax=axes_grid[3+windows.index(w)], 
-                   color='palevioletred', label='Non-Instructed', errorbar='ci')
+                   color='palevioletred', label='Not Instructed', errorbar='ci')
     axes_grid[3+windows.index(w)].set_ylabel("Median RT (s)")
     axes_grid[3+windows.index(w)].legend()
     
     plot_var_rt(trials_df[trials_df.instructions==1],ax=axes_grid[6+windows.index(w)], 
                 color='mediumturquoise', label='Instructed', errorbar='ci')
     plot_var_rt(trials_df[trials_df.instructions==0],ax=axes_grid[6+windows.index(w)], 
-                color='palevioletred', label='Non-Instructed', errorbar='ci')
+                color='palevioletred', label='Not Instructed', errorbar='ci')
     axes_grid[6+windows.index(w)].set_ylabel("Variance RT (s^2)")
     axes_grid[6+windows.index(w)].legend()
     
