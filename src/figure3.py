@@ -146,7 +146,7 @@ ax['F'].set_title(f'All not instructed participants', color=COLORS['no_instructi
 ### MEDIAN RT AND RT VARIANCE
 # check functions in utils
 plot_median_rt(data[data['instructions']==1], ax['G'], label='Instructed', color=COLORS['instructions'])
-plot_median_rt(data[data['instructions']==0], ax['G'], label='Non-instructed', color=COLORS['no_instructions'])
+plot_median_rt(data[data['instructions']==0], ax['G'], label='Not instructed', color=COLORS['no_instructions'])
 plot_var_rt(data[data['instructions']==1], ax['H'], label='Instructed', color=COLORS['instructions'])
 plot_var_rt(data[data['instructions']==0], ax['H'], label='Not instructed', color=COLORS['no_instructions'])
 ax['H'].get_legend().remove()
