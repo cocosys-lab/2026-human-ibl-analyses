@@ -96,6 +96,7 @@ def plot_two_curves_on_ax(
     palette,
     labels=None,
     title="",
+    title_color="black",
     x_col="signed_contrast",
     y_col="choice_right",
     subject_col="subject",
@@ -149,12 +150,39 @@ def plot_two_curves_on_ax(
                 alpha=0.25,
                 edgecolor="none",
             )
+            # One value per subject at each contrast
+            subject_points = (
+                sub_df.groupby([subject_col, x_col])
+                .agg(p_right=(y_col, "mean"))
+                .reset_index()
+            )
+            subject_points["p_right"] *= 100
+
+            # Solid mean points + 95% CIs
+            sns.lineplot(
+                data=subject_points,
+                x=x_col,
+                y="p_right",
+                ax=ax,
+                estimator="mean",
+                errorbar=("ci", 95),
+                err_style="bars",
+                n_boot=1000,
+                seed=42,
+                color=palette[value],
+                marker="o",
+                markersize=5,
+                markeredgewidth=0,
+                linestyle="None",
+                err_kws={"capsize": 2, "linewidth": 1},
+                legend=False,
+            )
  
     ax.set_xlabel("Signed contrast (%)")
     ax.set_xlim([-110, 110])
     ax.set_ylim([0, 102])
     ax.set_yticks([0, 25, 50, 75, 100])
-    ax.set_title(title)
+    ax.set_title(title, color=title_color)
  
     if show_ylabel:
         ax.set_ylabel("P(right) (%)")
@@ -203,7 +231,6 @@ def plot_panel_with_inset(
  
     labels = _normalize_labels(labels, group_values)
  
-    # main panel
     plot_two_curves_on_ax(
         ax,
         df_panel,
