@@ -74,8 +74,8 @@ def plot_learning_curve(data, ax=None, color=None, label=None,
     return ax
 
 
-def plot_mean_cursor_trajectories(data, cursor_col, time_col, ax, color, time_window, xlabel):
-    for contrast in np.sort(data['stimContrast'].unique()):
+def plot_mean_cursor_trajectories(data, cursor_col, time_col, ax, palette, time_window, xlabel):
+    for i, contrast in enumerate(np.sort(data['stimContrast'].unique())):
         for choice in [1,-1]:
             selected_data = data[(data['stimContrast']==contrast)&(data['choice']==choice)]
             if selected_data.empty:
@@ -84,10 +84,10 @@ def plot_mean_cursor_trajectories(data, cursor_col, time_col, ax, color, time_wi
             cursor_data = np.vstack(selected_data[cursor_col].values)
             mean_cursor = np.nanmean(cursor_data, axis=0)
             if choice == 1:
-                ax.plot(data[time_col].iloc[0], mean_cursor, color=color, alpha=np.min([contrast+0.3, 1]), label=f'{contrast:.2f}')
+                ax.plot(data[time_col].iloc[0], mean_cursor, color=palette[i], alpha=np.min([contrast+0.3, 1]), label=f'{contrast*100:.0f}')
             else:
-                ax.plot(data[time_col].iloc[0], mean_cursor, color=color, alpha=np.min([contrast+0.3, 1]), label=None)
-    ax.legend(title='Stimulus contrast')
+                ax.plot(data[time_col].iloc[0], mean_cursor, color=palette[i], alpha=np.min([contrast+0.3, 1]), label=None)
+    ax.legend(title='Stimulus contrast (%)')
     ax.set_xlim(time_window)
     ax.set_ylim(-600, 600)
     ax.set_xlabel(xlabel)
@@ -96,17 +96,18 @@ def plot_mean_cursor_trajectories(data, cursor_col, time_col, ax, color, time_wi
 
 
 def plot_all_session_trajectories(data, color_first_last, ax, highlight_first_last=True, contrast_level=None):
-    palette = sns.color_palette(f"blend:{color_first_last[0]},{color_first_last[1]}", n_colors=len(data))
 
     if contrast_level:
         data = data[data['stimContrast']==contrast_level]
         if len(data) == 0:
             raise(ValueError(f'No trials available at contrast {contrast_level}'))
 
-    for i, row in data.iterrows():
-        i-=data.index[0]
+    palette = sns.color_palette(f"blend:{color_first_last[0]},{color_first_last[1]}", n_colors=len(data))
+
+    for i, index_row in enumerate(data.iterrows()):
+        row_i, row = index_row
         if len(row['cursorTime']) != len(row['cursorPosition']):
-            print(f'cursor data and time not aligned on trial {i}')
+            print(f'cursor data and time not aligned on row {row_i}')
             continue
         ax.plot(row['cursorTime'], row['cursorPosition']-row['cursorPosition'][0], color=palette[i], alpha=0.2, label=None)
     if highlight_first_last:
