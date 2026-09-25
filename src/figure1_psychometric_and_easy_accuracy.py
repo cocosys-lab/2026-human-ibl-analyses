@@ -24,7 +24,7 @@ import utils.transform_data as TD
 
 apply_style()
 
-DATA_PATH = REPO_ROOT / "data" / "processed_data.csv"
+DATA_PATH = REPO_ROOT / "data" / "processed_data_2026.csv"
 FIGURE_PATH = REPO_ROOT / "figures"
 FIGURE_PATH.mkdir(parents=True, exist_ok=True)
 

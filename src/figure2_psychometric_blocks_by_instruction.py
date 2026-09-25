@@ -26,7 +26,7 @@ import utils.transform_data as TD
 
 apply_style()
 
-DATA_PATH = REPO_ROOT / "data" / "processed_data.csv"
+DATA_PATH = REPO_ROOT / "data" / "processed_data_2026.csv"
 FIGURE_PATH = REPO_ROOT / "figures"
 
 ADD_INSETS = False
@@ -294,7 +294,7 @@ for extension in ["png", "svg"]:
             bbox_inches="tight",)
         
 #%% and then parameter comparison at the bottom
-fig, ax = plt.subplots(1,4, figsize=(12,3)) #(20,5)
+fig, ax = plt.subplots(1,4, figsize=(16,4)) #(20,5)
 param_names = ['Absolute_bias', 'lapse_low', 'lapse_high', 'slope']
 param_labels = ['Absolute bias', 'Lapse low', 'Lapse high', 'Slope']
 for i,param in enumerate(param_names):
