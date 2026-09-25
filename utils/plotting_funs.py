@@ -98,26 +98,28 @@ def plot_mean_cursor_trajectories(data, cursor_col, time_col, ax, palette, time_
 def plot_all_session_trajectories(data, color_first_last, ax, highlight_first_last=True, contrast_level=None):
 
     if contrast_level:
-        data = data[data['stimContrast']==contrast_level]
+        selected_data = data[data['stimContrast']==contrast_level].copy()
         if len(data) == 0:
             raise(ValueError(f'No trials available at contrast {contrast_level}'))
+    else:
+        selected_data = data.copy()
 
-    palette = sns.color_palette(f"blend:{color_first_last[0]},{color_first_last[1]}", n_colors=len(data))
+    palette = sns.color_palette(f"blend:{color_first_last[0]},{color_first_last[1]}", n_colors=len(selected_data))
 
-    for i, index_row in enumerate(data.iterrows()):
+    for i, index_row in enumerate(selected_data.iterrows()):
         row_i, row = index_row
-        if len(row['cursorTime']) != len(row['cursorPosition']):
+        if len(row['cursorTime_fromstim']) != len(row['cursorPosition_fromcentre']):
             print(f'cursor data and time not aligned on row {row_i}')
             continue
-        ax.plot(row['cursorTime'], row['cursorPosition']-row['cursorPosition'][0], color=palette[i], alpha=0.2, label=None)
+        ax.plot(row['cursorTime_fromstim'], row['cursorPosition_fromcentre']-row['cursorPosition_fromcentre'][0], color=palette[i], alpha=0.2, label=None)
     if highlight_first_last:
-        first_trial = data.iloc[0]
-        ax.plot(first_trial['cursorTime'], first_trial['cursorPosition'], color=palette[0], linewidth=3, label='first trial')
-        last_trial = data.iloc[-1]
-        ax.plot(last_trial['cursorTime'], last_trial['cursorPosition'], color=palette[-1], linewidth=3, label='last trial')
+        first_trial = selected_data.iloc[0]
+        ax.plot(first_trial['cursorTime_fromstim'], first_trial['cursorPosition_fromcentre'], color=palette[0], linewidth=3, label='first trial')
+        last_trial = selected_data.iloc[-1]
+        ax.plot(last_trial['cursorTime_fromstim'], last_trial['cursorPosition_fromcentre'], color=palette[-1], linewidth=3, label='last trial')
         ax.legend()
-    ax.axhline(-600, 0, 3, linestyle='--', color='lightgrey', label=None)
-    ax.axhline(600, 0, 3, linestyle='--', color='lightgrey', label=None)
+    ax.axhline(-618, 0, 3, linestyle='--', color='lightgrey', label=None)
+    ax.axhline(618, 0, 3, linestyle='--', color='lightgrey', label=None)
     ax.set_xlim(0,3)
     ax.set_ylim(-630,630)
     ax.set_xlabel('Time from stimulus onset (s)')
