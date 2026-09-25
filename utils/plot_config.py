@@ -23,7 +23,7 @@ COLORS = {
 # Ordered palettes
 CONTINUOUS_PALETTE = sns.color_palette("viridis", as_cmap=True)
 DIVERGING_PALETTE = sns.color_palette("coolwarm", as_cmap=True)
-CONTRAST_PALETTE = sns.color_palette('Greys', n_colors=5)
+CONTRAST_PALETTE = sns.color_palette('Greys', n_colors=10)[-5:]
 
 # Font sizes, centralized
 FONT_SIZES = {
