@@ -7,6 +7,7 @@ from utils.plot_config import apply_style, COLORS, CONTRAST_PALETTE, EXAMPLE_SES
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 from matplotlib.colors import ListedColormap
+import re
 
 import seaborn as sns
 import pandas as pd
@@ -18,28 +19,28 @@ import utils.form_psychometrics as P
 
 apply_style()
 
-contrast_level = 1. # or None for all contrasts in wiggle plot
-
 #%% import data
-data = pd.read_csv("../../hivemind2025/data/processed_data.csv")
-data = TD.preprocess_trials(data)
-all_trials = pd.read_csv('../../hivemind2025/data/human_trials.csv')
-data['rt'] = all_trials['response_times_from_stim']
 
-wiggle_data = pd.read_csv("../../misc-scripts/data/processed_data.csv") # FIXME: need to get this from the data not from a separate file; don't delete wiggle column in prepro
-wiggles_as_array = [np.array(ast.literal_eval(row[1]['stimTrajectory'])) for row in wiggle_data.iterrows()]
-wiggles_from_zero = [wiggle - wiggle[0] for wiggle in wiggles_as_array]
-data['cursorPosition'] = wiggles_from_zero
+data = pd.read_csv('../data/processed_data_2026.csv', converters={'cursorTime': ast.literal_eval, 'cursorPosition': ast.literal_eval})
+
+data = TD.preprocess_trials(data)
+data = TD.transform_contrast_to_ix(data) #add contrast index for plotting
+
+contrast_level = 1. # or None for all contrasts in wiggle plot
 
 #%% prepare cursor data
 
-# screen refresh rate is 75Hz
-refresh_rate = 75 # TODO: get this from the data somehow
-max_rt = data['rt'].max()
-data['cursorTime'] = [np.arange(0, max_rt, 1/refresh_rate)[:len(row[1]['cursorPosition'])] for row in data.iterrows()] # FIXME: this is maybe hacky
-data['timeToResp'] = [np.arange(0, max_rt+0.1, 1/refresh_rate) for row in data.iterrows()]
-data['timeFromResp'] = [np.arange(-max_rt-0.1, 0, 1/refresh_rate) for row in data.iterrows()]
+# rereference cursor position and time within trial
+data['cursorPosition_fromcentre'] = [np.array(row['cursorPosition']) - row['cursorPosition'][0] for i,row in data.iterrows()]
+data['cursorTime_fromstim'] = [np.array(row['cursorTime']) - row['cursorTime'][0] for i,row in data.iterrows()]
 
+# make some extra time columns for plotting
+refresh_rate = 75
+max_rt = data['rt'].max()
+data['timeToResp'] = [np.arange(0, max_rt+0.1, 1/refresh_rate) for row in data.iterrows()] # fill in the total time to response from stim (slightly longer than necessary to make sure all samples have timestamps)
+data['timeFromResp'] = [np.arange(-max_rt-0.1, 0, 1/refresh_rate) for row in data.iterrows()] # same but with response at time 0s and stim at time -10s
+
+# make cursor column equal lengths for averaging
 def _traj_fill_in_nans(trajectory, max_rt, refresh_rate, direction='from_stim'):
     x_time = np.arange(0, max_rt+0.1, 1/refresh_rate)
     traj_nans = np.ones_like(x_time) * np.nan
@@ -51,10 +52,8 @@ def _traj_fill_in_nans(trajectory, max_rt, refresh_rate, direction='from_stim'):
         raise(ValueError)
     return traj_nans
 
-data['cursorPositionNan'] = [_traj_fill_in_nans(row[1]['cursorPosition'], max_rt, refresh_rate, direction='from_stim') for row in data.iterrows()]
-data['nanCursorPosition'] = [_traj_fill_in_nans(row[1]['cursorPosition'], max_rt, refresh_rate, direction='from_resp') for row in data.iterrows()]
-
-data = TD.transform_contrast_to_ix(data) #add contrast index for plotting
+data['cursorPositionNan'] = [_traj_fill_in_nans(row[1]['cursorPosition_fromcentre'], max_rt, refresh_rate, direction='from_stim') for row in data.iterrows()]
+data['nanCursorPosition'] = [_traj_fill_in_nans(row[1]['cursorPosition_fromcentre'], max_rt, refresh_rate, direction='from_resp') for row in data.iterrows()]
 
 #%% select example sessions
 
