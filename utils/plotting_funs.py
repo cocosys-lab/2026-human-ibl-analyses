@@ -87,7 +87,7 @@ def plot_mean_cursor_trajectories(data, cursor_col, time_col, ax, palette, time_
                 ax.plot(data[time_col].iloc[0], mean_cursor, color=palette[i], alpha=np.min([contrast+0.3, 1]), label=f'{contrast*100:.0f}')
             else:
                 ax.plot(data[time_col].iloc[0], mean_cursor, color=palette[i], alpha=np.min([contrast+0.3, 1]), label=None)
-    ax.legend(title='Stimulus contrast (%)')
+    ax.legend(title='Stimulus\ncontrast (%)')
     ax.set_xlim(time_window)
     ax.set_ylim(-600, 600)
     ax.set_xlabel(xlabel)

@@ -130,8 +130,8 @@ ax['D'].get_legend().remove()
 data_instructions = data[data['instructions']==1]
 data_no_instructions = data[data['instructions']==0]
 
-plot_mean_cursor_trajectories(data_instructions, 'cursorPositionNan', 'timeToResp', ax['E'], CONTRAST_PALETTE, (0,3), 'Time from stimulus onset (s)')
-plot_mean_cursor_trajectories(data_no_instructions, 'cursorPositionNan', 'timeToResp', ax['F'], CONTRAST_PALETTE, (0,3), 'Time from stimulus onset (s)')
+plot_mean_cursor_trajectories(data_instructions, 'cursorPositionNan', 'timeToResp', ax['E'], CONTRAST_PALETTE, (0,2), 'Time from stimulus onset (s)')
+plot_mean_cursor_trajectories(data_no_instructions, 'cursorPositionNan', 'timeToResp', ax['F'], CONTRAST_PALETTE, (0,2), 'Time from stimulus onset (s)')
 ax['E'].get_legend().remove()
 ax['F'].get_legend().set(loc='center left', bbox_to_anchor=[1.02, 0.5])
 ax['E'].set_title(f'All instructed participants', color=COLORS['instructions'])
@@ -157,7 +157,7 @@ fig.tight_layout()
 _e_pos = ax['E'].get_position()
 _f_pos = ax['F'].get_position()
 _gap = _f_pos.x0 - _e_pos.x1
-_shrink = 0.12
+_shrink = 0.1
 _scale = ((_e_pos.width + _f_pos.width) - _shrink) / (_e_pos.width + _f_pos.width)
 ax['E'].set_position([_e_pos.x0, _e_pos.y0, _e_pos.width * _scale, _e_pos.height])
 ax['F'].set_position([_e_pos.x0 + (_e_pos.width * _scale) + _gap, _f_pos.y0, _f_pos.width * _scale, _f_pos.height])
