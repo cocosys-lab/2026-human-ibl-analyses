@@ -12,8 +12,8 @@ EXAMPLE_SESSIONS = {
 COLORS = {
     "left_block": "#5D3B92",
     "right_block": "#EF6528",
-    "instructions": "mediumturquoise",
-    "no_instructions": "palevioletred",
+    "instructions": "#3B6F92",
+    "no_instructions": "#FF9AE6",
     'correct': 'darkgreen',
     'incorrect': 'firebrick'
 }
