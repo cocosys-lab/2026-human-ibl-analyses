@@ -65,33 +65,33 @@ for w in windows:
     P.plot_panel_with_inset(
         axes_grid[windows.index(w)], trials_df,
         group_col="instructions", group_values=[1, 0],
-        palette={1: "mediumturquoise", 0: "palevioletred"},
+        palette={1: COLORS['instructions'], 0: COLORS['no_instructions']},
         labels={1: "Instructed", 0: "Not Instructed"},
         title=f"Trials {w[0]}-{w[1]}",scatter=False
     )
     grouped_df = trials_df.groupby(['subject','signed_contrast', 'instructions']).agg({'choice_right':'mean'}).reset_index()
     grouped_df['choice_right'] = grouped_df['choice_right']*100
     sns.lineplot(data=grouped_df[grouped_df.instructions==1], x='signed_contrast', y='choice_right',
-                 ax=axes_grid[windows.index(w)], color='mediumturquoise', label='Instructed', errorbar='ci',
+                 ax=axes_grid[windows.index(w)], color=COLORS['instructions'], label='Instructed', errorbar='ci',
                  err_style='bars', linewidth=0, marker='o', markersize=5)
     sns.lineplot(data=grouped_df[grouped_df.instructions==0], x='signed_contrast', y='choice_right',
-                 ax=axes_grid[windows.index(w)], color='palevioletred', label='Non-Instructed', errorbar='ci',
+                 ax=axes_grid[windows.index(w)], color=COLORS['no_instructions'], label='Not Instructed', errorbar='ci',
                  err_style='bars', linewidth=0, marker='o', markersize=5)
     axes_grid[windows.index(w)].set_ylabel("P(right) (%)")
     axes_grid[windows.index(w)].legend()
     
     plot_median_rt(trials_df[trials_df.instructions==1],ax=axes_grid[3+windows.index(w)], 
-                   color='mediumturquoise', label='Instructed', errorbar='ci')
+                   color=COLORS['instructions'], label='Instructed', errorbar='ci')
     plot_median_rt(trials_df[trials_df.instructions==0],ax=axes_grid[3+windows.index(w)], 
-                   color='palevioletred', label='Not Instructed', errorbar='ci')
+                   color=COLORS['no_instructions'], label='Not Instructed', errorbar='ci')
     axes_grid[3+windows.index(w)].set_ylabel("Median RT (s)")
     axes_grid[3+windows.index(w)].legend()
     
     plot_var_rt(trials_df[trials_df.instructions==1],ax=axes_grid[6+windows.index(w)], 
-                color='mediumturquoise', label='Instructed', errorbar='ci')
+                color=COLORS['instructions'], label='Instructed', errorbar='ci')
     plot_var_rt(trials_df[trials_df.instructions==0],ax=axes_grid[6+windows.index(w)], 
-                color='palevioletred', label='Not Instructed', errorbar='ci')
-    axes_grid[6+windows.index(w)].set_ylabel("Variance RT (s^2)")
+                color=COLORS['no_instructions'], label='Not Instructed', errorbar='ci')
+    axes_grid[6+windows.index(w)].set_ylabel(r"Variance RT (s$^2$)")
     axes_grid[6+windows.index(w)].legend()
     
 sns.despine(fig=fig)
