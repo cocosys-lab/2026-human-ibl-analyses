@@ -1,0 +1,9 @@
+# Requires Python >= 3.12 (tested with 3.12.11)
+numpy>=2.3,<3
+pandas>=3.0,<4
+matplotlib>=3.11,<4
+seaborn>=0.13.2,<1
+scipy>=1.18,<2
+scikit-learn>=1.7,<2
+tqdm>=4.67,<5
+psychofit>=1.0,<2
