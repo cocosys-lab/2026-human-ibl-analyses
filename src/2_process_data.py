@@ -41,7 +41,7 @@ processed_df['sideContrast'] = processed_df['contLeft'] - processed_df['contRigh
 # processed_df.loc[(processed_df['contrastLeft']==0.5)&(processed_df['contrastRight']==0.5), 'contRight'] = np.nan
 
 # get the stimulus trajectory and convert to float
-# N.B. The cursor position could be recorded for up to 506ms after the response window time out at 10s. This was always registered as a no-response and feedback was given accordingly, even if the cursor crossed the response threshold in the extra samples. We therefore remove the extra samples here.
+# N.B. The cursor position could be recorded for up to 506ms after the response window time out at 10s. This was always registered as a no-response and feedback was given accordingly, even if the cursor crossed the response threshold in the extra samples. We therefore remove the extra samples here and recode the response time as a nan, rather than keeping it as a value >10s.
 processed_df['cursorPosition'] = None
 processed_df['cursorTime'] = None
 not_same_len = []
