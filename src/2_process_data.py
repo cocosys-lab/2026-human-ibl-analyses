@@ -54,7 +54,7 @@ for idx in processed_df.index:
     time_float = [float(n) for n in time_str.split(",")]
     processed_df.at[idx, 'cursorTime'] = time_float
     if len(mouse_float) > len(time_float):
-        processed_df.at[idx, 'response_time_from_stim'] = np.nan
+        processed_df.at[idx, 'response_times_from_stim'] = np.nan
         processed_df.at[idx, 'cursorPosition'] = mouse_float[:len(time_float)]
 
 # only keep columns we need to avoid confusion
