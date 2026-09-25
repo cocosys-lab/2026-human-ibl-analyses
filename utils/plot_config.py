@@ -4,8 +4,8 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 
 EXAMPLE_SESSIONS = {
-    'instructions':'094', 
-    'no_instructions': '010'
+    'instructions': 94, 
+    'no_instructions': 27 
 }
 
 # Named colors, keyed for semantic use
