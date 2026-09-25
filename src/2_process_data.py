@@ -48,10 +48,10 @@ not_same_len = []
 discrepancy = []
 for idx in processed_df.index:
     mouse_str = processed_df.loc[idx, 'dot_trajectory'][1:-1]
-    mouse_float = np.array([float(n) for n in mouse_str.split(",")])
+    mouse_float = [float(n) for n in mouse_str.split(",")]
     processed_df.at[idx, 'cursorPosition'] = mouse_float
     time_str = processed_df.loc[idx, 'mouse.time'][1:-1]
-    time_float = np.array([float(n) for n in time_str.split(",")])
+    time_float = [float(n) for n in time_str.split(",")]
     processed_df.at[idx, 'cursorTime'] = time_float
     if len(mouse_float) > len(time_float):
         processed_df.at[idx, 'response_time_from_stim'] = np.nan
@@ -63,3 +63,5 @@ processed_df.rename(columns={'contLeft':'contrastLeft', 'contRight':'contrastRig
 
 # save csv
 processed_df.to_csv(data_path / 'processed_data_2026.csv', index=False)
+
+# %%
