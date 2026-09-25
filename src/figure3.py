@@ -21,12 +21,13 @@ apply_style()
 
 #%% import data
 
-data = pd.read_csv('../data/processed_data_2026.csv', converters={'cursorTime': ast.literal_eval, 'cursorPosition': ast.literal_eval})
+data = pd.read_csv('../data/processed_data_2026.csv', converters={'cursorTime': ast.literal_eval, 
+                                                             'cursorPosition': ast.literal_eval})
 
 data = TD.preprocess_trials(data)
 data = TD.transform_contrast_to_ix(data) #add contrast index for plotting
 
-contrast_level = 1. # or None for all contrasts in wiggle plot
+contrast_level = None #1. # or None for all contrasts in wiggle plot
 
 #%% prepare cursor data
 
@@ -106,9 +107,10 @@ for key, a in zip(ex_data_dict, [ax['A'], ax['B']]):
     a.set_title(f'Participant {EXAMPLE_SESSIONS[key2]}: {key}', color=ex_data_dict[key]['col'])
     a.set_ylim(ylims)
 handles, labels = ax['A'].get_legend_handles_labels()
-legend_a = ax['A'].legend(handles, ['incorrect', 'correct', 'rolling median RT'], bbox_to_anchor=[1, -0.3])
-legend_a.set_in_layout(False)
-ax['B'].get_legend().remove()
+# legend_a = 
+legend_a = ax['B'].legend(handles, ['Incorrect', 'Correct', 'rolling median RT'], 
+                          bbox_to_anchor=[1, 1], loc='center left', frameon=False)
+ax['A'].get_legend().remove()
 
 ### MOUSE WIGGLES
 # whole session of cursor movements
@@ -123,7 +125,8 @@ for key, a in zip(ex_data_dict, [ax['C'], ax['D']]):
         a.set_title(f'Participant {EXAMPLE_SESSIONS[key2]}: {key}\nEasy trials', color=ex_data_dict[key]['col'])
     else:
         a.set_title(f'Participant {EXAMPLE_SESSIONS[key2]}: {key}', color=ex_data_dict[key]['col'])
-ax['D'].get_legend().remove()
+ax['C'].get_legend().remove()
+ax['D'].legend(loc='center left', bbox_to_anchor=[1.02, 0.5], frameon=False)
 
 # from stimulus
 data_instructions = data[data['instructions']==1]
@@ -132,7 +135,7 @@ data_no_instructions = data[data['instructions']==0]
 plot_mean_cursor_trajectories(data_instructions, 'cursorPositionNan', 'timeToResp', ax['E'], CONTRAST_PALETTE, (0,2), 'Time from stimulus onset (s)')
 plot_mean_cursor_trajectories(data_no_instructions, 'cursorPositionNan', 'timeToResp', ax['F'], CONTRAST_PALETTE, (0,2), 'Time from stimulus onset (s)')
 ax['E'].get_legend().remove()
-ax['F'].get_legend().set(loc='center left', bbox_to_anchor=[1.02, 0.5])
+ax['F'].legend(loc='center left', bbox_to_anchor=[1.02, 0.5], frameon=False, title='Contrast (%)')
 ax['E'].set_title(f'All instructed participants', color=COLORS['instructions'])
 ax['F'].set_title(f'All not instructed participants', color=COLORS['no_instructions'])
 
@@ -148,18 +151,18 @@ plot_median_rt(data[data['instructions']==1], ax['G'], label='Instructed', color
 plot_median_rt(data[data['instructions']==0], ax['G'], label='Not instructed', color=COLORS['no_instructions'])
 plot_var_rt(data[data['instructions']==1], ax['H'], label='Instructed', color=COLORS['instructions'])
 plot_var_rt(data[data['instructions']==0], ax['H'], label='Not instructed', color=COLORS['no_instructions'])
-ax['H'].get_legend().remove()
-
+ax['G'].get_legend().remove()
+ax['H'].legend(loc='center left', bbox_to_anchor=[1.02, 0.5], frameon=False)
 fig.tight_layout()
 
 # make only the E/F row narrower to leave space for the legend on the right
-_e_pos = ax['E'].get_position()
-_f_pos = ax['F'].get_position()
-_gap = _f_pos.x0 - _e_pos.x1
-_shrink = 0.1
-_scale = ((_e_pos.width + _f_pos.width) - _shrink) / (_e_pos.width + _f_pos.width)
-ax['E'].set_position([_e_pos.x0, _e_pos.y0, _e_pos.width * _scale, _e_pos.height])
-ax['F'].set_position([_e_pos.x0 + (_e_pos.width * _scale) + _gap, _f_pos.y0, _f_pos.width * _scale, _f_pos.height])
+# _e_pos = ax['E'].get_position()
+# _f_pos = ax['F'].get_position()
+# _gap = _f_pos.x0 - _e_pos.x1
+# _shrink = 0.1
+# _scale = ((_e_pos.width + _f_pos.width) - _shrink) / (_e_pos.width + _f_pos.width)
+# ax['E'].set_position([_e_pos.x0, _e_pos.y0, _e_pos.width * _scale, _e_pos.height])
+# ax['F'].set_position([_e_pos.x0 + (_e_pos.width * _scale) + _gap, _f_pos.y0, _f_pos.width * _scale, _f_pos.height])
 
 sns.despine(fig=fig)
 

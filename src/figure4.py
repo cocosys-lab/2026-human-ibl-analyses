@@ -9,14 +9,19 @@ import utils.transform_data as TD
 from matplotlib.gridspec import GridSpec
 from utils.plotting_funs import plot_learning_curve, plot_median_rt, plot_var_rt
 import utils.form_psychometrics as P
+from pathlib import Path
 
 apply_style()
 
 #%% import data
-data = pd.read_csv("../../hivemind2025/data/processed_data.csv")
+REPO_ROOT = Path(__file__).resolve().parents[1]
+sys.path.append(str(REPO_ROOT))
+DATA_PATH = REPO_ROOT / "data" / "processed_data_2026.csv"
+FIGURE_PATH = REPO_ROOT / "figures"
+FIGURE_PATH.mkdir(parents=True, exist_ok=True)
+
+data = pd.read_csv(DATA_PATH, dtype={"subject": str})
 data = TD.preprocess_trials(data)
-all_trials = pd.read_csv('../../hivemind2025/data/human_trials.csv')
-data['rt'] = all_trials['response_times_from_stim']
 
 #%% create figure with proper dimensions
 windows = [[0,200], [200,400], [400,600]]
@@ -98,7 +103,9 @@ sns.despine(fig=fig)
 for x in axes_grid:
     x.get_legend().remove()
 axes_top[0].get_legend().remove()
+axes_top[1].legend(frameon=False)
 #bottom row is psychometrics, median rt and variance of rt at different time points
+#%%
 fig.savefig('../figures/figure4_all_trials.png', dpi=300, bbox_inches='tight')
 fig.savefig('../figures/figure4_all_trials.svg', dpi=300, bbox_inches='tight')
 # %%
