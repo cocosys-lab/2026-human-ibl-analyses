@@ -29,16 +29,16 @@ assert processed_df['choice'].isna().sum() == 0
 processed_df['stimSide'] = processed_df['eccentricity'].replace({-15:1, 15:-1}) # this matches the direction of the choice coding
 
 scaler = MinMaxScaler(feature_range=(0, 1))
-processed_df['contLeft'] = scaler.fit_transform(processed_df[['contrastLeft']])
-processed_df['contRight'] = scaler.fit_transform(processed_df[['contrastRight']])
+processed_df['contLeft'] = scaler.fit_transform(processed_df[['contrastLeft']]).ravel().round(2)
+processed_df['contRight'] = scaler.fit_transform(processed_df[['contrastRight']]).ravel().round(2)
 
 # compute some columns
 processed_df['stimContrast'] = processed_df['contLeft'] + processed_df['contRight']
 processed_df['sideContrast'] = processed_df['contLeft'] - processed_df['contRight'] # this matches the direction of the choice coding
 
 # replace with nans when both sides are 0
-processed_df.loc[(processed_df['contrastLeft']==0.5)&(processed_df['contrastRight']==0.5), 'contLeft'] = np.nan
-processed_df.loc[(processed_df['contrastLeft']==0.5)&(processed_df['contrastRight']==0.5), 'contRight'] = np.nan
+# processed_df.loc[(processed_df['contrastLeft']==0.5)&(processed_df['contrastRight']==0.5), 'contLeft'] = np.nan
+# processed_df.loc[(processed_df['contrastLeft']==0.5)&(processed_df['contrastRight']==0.5), 'contRight'] = np.nan
 
 # get the stimulus trajectory and convert to float
 processed_df['stimTrajectory'] = None
@@ -48,7 +48,7 @@ for idx in processed_df.index:
     processed_df.at[idx, 'stimTrajectory'] = mouse_float
 
 # only keep columns we need to avoid confusion
-processed_df = processed_df[['subject', 'session', 'trial', 'probabilityLeft', 'contLeft', 'contRight', 'choice', 'feedbackType', 'stimContrast', 'sideContrast', 'stimSide', 'instructions', 'stimTrajectory', 'mouse.time', 'dot.started']]
+processed_df = processed_df[['subject', 'session', 'trial', 'probabilityLeft', 'contLeft', 'contRight', 'choice', 'firstMovement_times_from_stim', 'response_times_from_stim', 'feedbackType', 'stimContrast', 'sideContrast', 'stimSide', 'instructions', 'stimTrajectory', 'mouse.time', 'dot.started']]
 processed_df.rename(columns={'contLeft':'contrastLeft', 'contRight':'contrastRight'}, inplace=True)
 
 # save csv
