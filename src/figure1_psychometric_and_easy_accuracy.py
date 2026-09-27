@@ -92,6 +92,8 @@ sns.lineplot(data=grouped_df[grouped_df.instructions==0], x='signed_contrast', y
                 err_style='bars', linewidth=0, marker='o', markersize=5)
 
 axes[0].set_ylabel("P(right) (%)")
+handles, labels = axes[0].get_legend_handles_labels()
+axes[0].legend(handles[::-1], labels[::-1],  frameon=False)
 
 rng = np.random.default_rng(42)
 
