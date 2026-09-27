@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import sys
 sys.path.append("..")
-from utils.plot_config import apply_style, COLORS
+from utils.plot_config import apply_style, COLORS, GROUP_NAMES
 from utils.form_psychometrics import fit_psychometric #, plot_psychometric_fit
 import utils.transform_data as TD
 from scipy.stats import ttest_ind, ttest_rel
@@ -74,11 +74,11 @@ fig, ax = plt.subplots(1,3, figsize=(15,5))
 
 for i,param in enumerate(['Absolute bias', 'Slope', 'Mean lapse']):
     sns.stripplot(x='instructions', y=param, data=psychometric_df, 
-                  ax=ax[i], palette=[COLORS['no_instructions'], COLORS['instructions']],
+                  ax=ax[i], palette=[COLORS[GROUP_NAMES[1]], COLORS[GROUP_NAMES[0]]],
                   hue='instructions',  jitter=True, edgecolor='lightgray', linewidth=0.5, size=6,
                   zorder=1)
     sns.boxplot(x='instructions', y=param, data=psychometric_df, 
-                ax=ax[i], palette=[COLORS['no_instructions'], COLORS['instructions']],
+                ax=ax[i], palette=[COLORS[GROUP_NAMES[1]], COLORS[GROUP_NAMES[0]]],
                 hue='instructions',legend=False, saturation=0.7,
                 zorder=0)
     test_res = ttest_ind(instructed[param], non_instructed[param], 
@@ -89,20 +89,20 @@ for i,param in enumerate(['Absolute bias', 'Slope', 'Mean lapse']):
     ax[i].text(0.5, 0.95, annotation, transform=ax[i].transAxes, ha='center', va='top')
     ax[i].plot([0.3, 0.7], [0.9, 0.9], transform=ax[i].transAxes, color='k', lw=1)
     ax[i].get_legend().remove()
-    ax[i].set_xticklabels(['Not instructed', 'Instructed'])
+    ax[i].set_xticklabels([GROUP_NAMES[1], GROUP_NAMES[0]])
     ax[i].set_xlabel('')
     
-ax[2].legend(['Not instructed', 'Instructed'], loc='best')
+ax[2].legend([GROUP_NAMES[1], GROUP_NAMES[0]], loc='best')
 sns.despine(fig=fig)
 # %% then another figure for the differences between left and right blocks, between groups
 fig, ax = plt.subplots(1,3, figsize=(15,5))
 for i,param in enumerate([r'$\Delta$ Absolute bias', r'$\Delta$ Mean lapse', r'$\Delta$ Slope']):
     sns.stripplot(x='instructions', y=param, data=psychometric_df, 
-                  ax=ax[i], palette=[COLORS['no_instructions'], COLORS['instructions']],
+                  ax=ax[i], palette=[COLORS[GROUP_NAMES[1]], COLORS[GROUP_NAMES[0]]],
                   hue='instructions', jitter=True, edgecolor='lightgray', linewidth=0.5, size=6,
                   zorder=1)
     sns.boxplot(x='instructions', y=param, data=psychometric_df, 
-                ax=ax[i], palette=[COLORS['no_instructions'], COLORS['instructions']],
+                ax=ax[i], palette=[COLORS[GROUP_NAMES[1]], COLORS[GROUP_NAMES[0]]],
                 hue='instructions', hue_order = [0,1],legend=False, saturation=0.7,
                 zorder=0)
     test_res = ttest_ind(instructed[param], non_instructed[param], 
@@ -113,9 +113,9 @@ for i,param in enumerate([r'$\Delta$ Absolute bias', r'$\Delta$ Mean lapse', r'$
     ax[i].text(0.5, 0.95, annotation, transform=ax[i].transAxes, ha='center', va='top')
     ax[i].plot([0.3, 0.7], [0.9, 0.9], transform=ax[i].transAxes, color='k', lw=1)
     ax[i].get_legend().remove()
-    ax[i].set_xticklabels(['Not instructed', 'Instructed'])
+    ax[i].set_xticklabels([GROUP_NAMES[1], GROUP_NAMES[0]])
     ax[i].set_xlabel('')
-ax[2].legend(['Not instructed', 'Instructed'], loc='best')
+ax[2].legend([GROUP_NAMES[1], GROUP_NAMES[0]], loc='best')
 sns.despine(fig=fig)
 
 # %% then, get the statistical difference within instruction group between left and right
@@ -149,7 +149,7 @@ for i,param in enumerate(param_names):
                 ax=ax[i], palette=[COLORS['left_block'], COLORS['right_block']],
                 hue_order = ['Left', 'Right'],legend=False, saturation=0.7, zorder=0)
     ax[i].set_ylabel(param_labels[i])
-    ax[i].set_xticklabels(['Not instructed', 'Instructed'])
+    ax[i].set_xticklabels([GROUP_NAMES[1], GROUP_NAMES[0]])
     #then, for each instruction group, perform a t-test between left and right blocks
     for j, instr in enumerate([1,0]):
         left_values = longform[(longform['parameter']==param) & (longform['instructions']==instr) & (longform['block']=='Left')]['value']
@@ -170,21 +170,21 @@ data_high['correct'] = data_high['correct']*100
 fig, ax = plt.subplots(figsize=(5,5))
 sns.stripplot(data=data_high, x='instructions', y='correct',
               hue='instructions', ax=ax, jitter=True, edgecolor='white', linewidth=0.5,
-              palette=[COLORS['no_instructions'],COLORS['instructions']],
+              palette=[COLORS[GROUP_NAMES[1]], COLORS[GROUP_NAMES[0]]],
               zorder=1)
 sns.boxplot(data=data_high, x='instructions',y='correct',
             hue='instructions',ax=ax, saturation=0.5,
-            palette=[COLORS['no_instructions'],COLORS['instructions']],
+            palette=[COLORS[GROUP_NAMES[1]], COLORS[GROUP_NAMES[0]]],
             zorder=0)
 ttest_result = ttest_ind(data_high.loc[data_high.instructions==0,'correct'], data_high.loc[data_high.instructions==1,'correct'],
                          alternative='two-sided')
 annotation = '***' if ttest_result.pvalue < 0.001 else ('**' if ttest_result.pvalue < 0.01 else ('*'if ttest_result.pvalue < 0.05 else 'n.s.') )
 ax.text(0.5, 1.05, annotation, transform=ax.transAxes, ha='center', va='top')
 ax.plot([0.25, 0.75], [1, 1], transform=ax.transAxes, color='k', lw=1)
-ax.legend(['Not instructed','Instructed'],title='')
+ax.legend([GROUP_NAMES[1], GROUP_NAMES[0]],title='')
 ax.set_ylabel('P(correct) (%)')
 ax.set_xlabel('')
-ax.set_xticklabels(['Not instructed','Instructed'])
+ax.set_xticklabels([GROUP_NAMES[1], GROUP_NAMES[0]])
 
 sns.despine(fig=fig)
 
