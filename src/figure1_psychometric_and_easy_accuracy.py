@@ -18,7 +18,7 @@ from scipy.stats import t, ttest_ind
 REPO_ROOT = Path(__file__).resolve().parents[1]
 sys.path.append(str(REPO_ROOT))
 
-from utils.plot_config import COLORS, apply_style
+from utils.plot_config import COLORS, GROUP_NAMES, apply_style
 import utils.form_psychometrics as P
 import utils.transform_data as TD
 
@@ -29,10 +29,10 @@ FIGURE_PATH = REPO_ROOT / "figures"
 FIGURE_PATH.mkdir(parents=True, exist_ok=True)
 
 GROUP_ORDER = [1, 0]
-GROUP_LABELS = {1: "Instructed", 0: "Not instructed"}
+GROUP_LABELS = {1: GROUP_NAMES[0], 0: GROUP_NAMES[1]}
 GROUP_COLORS = {
-    1: COLORS["instructions"],
-    0: COLORS["no_instructions"],
+    1: COLORS[GROUP_NAMES[0]],
+    0: COLORS[GROUP_NAMES[1]],
 }
 
 # In processed_data.csv, stimContrast == 1 denotes the highest contrast.
@@ -85,10 +85,10 @@ P.plot_two_curves_on_ax(
 grouped_df = data.groupby(['subject','signed_contrast', 'instructions']).agg({'choice_right':'mean'}).reset_index()
 grouped_df['choice_right'] = grouped_df['choice_right']*100
 sns.lineplot(data=grouped_df[grouped_df.instructions==1], x='signed_contrast', y='choice_right',
-                ax=axes[0], color=COLORS['instructions'], legend=False, errorbar='ci',
+                ax=axes[0], color=COLORS[GROUP_NAMES[0]], legend=False, errorbar='ci',
                 err_style='bars', linewidth=0, marker='o', markersize=5)
 sns.lineplot(data=grouped_df[grouped_df.instructions==0], x='signed_contrast', y='choice_right',
-                ax=axes[0], color=COLORS['no_instructions'], legend=False, errorbar='ci',
+                ax=axes[0], color=COLORS[GROUP_NAMES[1]], legend=False, errorbar='ci',
                 err_style='bars', linewidth=0, marker='o', markersize=5)
 
 axes[0].set_ylabel("P(right) (%)")
@@ -101,11 +101,11 @@ data_high = data_high_contrast.groupby(['subject','instructions'])['correct'].me
 data_high['correct'] = data_high['correct']*100
 sns.stripplot(data=data_high, x='instructions', y='correct',
               hue='instructions', ax=axes[1], jitter=True, edgecolor='white', linewidth=0.5,
-              palette=[COLORS['no_instructions'],COLORS['instructions']],
+              palette=[COLORS[GROUP_NAMES[1]],COLORS[GROUP_NAMES[1]]],
               zorder=1)
 sns.boxplot(data=data_high, x='instructions',y='correct',
             hue='instructions',ax=axes[1], saturation=0.5,
-            palette=[COLORS['no_instructions'],COLORS['instructions']],
+            palette=[COLORS[GROUP_NAMES[1]],COLORS[GROUP_NAMES[0]]],
             zorder=0)
 ttest_result = ttest_ind(data_high.loc[data_high.instructions==0,'correct'], data_high.loc[data_high.instructions==1,'correct'],
                          alternative='two-sided')
@@ -116,7 +116,7 @@ axes[1].plot([0.25, 0.75], [1, 1], transform=axes[1].transAxes, color='k', lw=1)
 axes[1].get_legend().remove()
 axes[1].set_ylabel('Accuracy on easy trials (%)')
 axes[1].set_xlabel('Instruction group')
-axes[1].set_xticklabels(['Not instructed','Instructed'])
+axes[1].set_xticklabels([GROUP_NAMES[1], GROUP_NAMES[0]])
 
 # sns.despine(fig=fig)
 

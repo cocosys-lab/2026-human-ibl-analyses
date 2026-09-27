@@ -20,7 +20,7 @@ from scipy.stats import ttest_rel
 REPO_ROOT = Path(__file__).resolve().parents[1]
 sys.path.append(str(REPO_ROOT))
 
-from utils.plot_config import COLORS, apply_style
+from utils.plot_config import COLORS, GROUP_NAMES, apply_style
 import utils.form_psychometrics as P
 import utils.transform_data as TD
 
@@ -47,15 +47,15 @@ block_labels = {
 }
 
 instruction_panels = [
-    (1, "Instructed"),
-    (0, "Not Instructed"),
+    (1, GROUP_NAMES[0]),
+    (0, GROUP_NAMES[1]),
 ]
 
 instruction_order = [1, 0]
-instruction_labels = ["Instructed", "Not Instructed"]
+instruction_labels =GROUP_NAMES
 instruction_colors = [
-    COLORS["instructions"],
-    COLORS["no_instructions"],
+    COLORS[GROUP_NAMES[0]],
+    COLORS[GROUP_NAMES[1]],
 ]
 
 
@@ -269,9 +269,10 @@ sns.boxplot(
     palette=instruction_colors, zorder=0,
     ax=axes[2], saturation=0.7, dodge=False,
 )
-axes[2].legend(['Not instructed', 'Instructed'], frameon=False, loc='upper left', bbox_to_anchor=(1, 0.7))
+# axes[2].legend([GROUP_NAMES[1], GROUP_NAMES[0]], frameon=False, loc='upper left', bbox_to_anchor=(1, 0.7))
+axes[2].get_legend().remove()
 axes[2].axhline(0, color="0.5", linewidth=1, linestyle="--")
-axes[2].set_xticks([0, 1], ['Not instructed', 'Instructed'])
+axes[2].set_xticks([0, 1], [GROUP_NAMES[1], GROUP_NAMES[0]])
 axes[2].set_ylabel(
     f"{delta_method_label} ΔP(right) at 0% contrast\n"
     #"(Right block - Left block)"
@@ -311,7 +312,7 @@ for i,param in enumerate(param_names):
                 ax=ax[i], palette=[COLORS['left_block'], COLORS['right_block']],
                 hue_order = ['Left', 'Right'],legend=False, saturation=0.7, zorder=0)
     ax[i].set_ylabel(param_labels[i])
-    ax[i].set_xticklabels(['Not instructed', 'Instructed'])
+    ax[i].set_xticklabels([GROUP_NAMES[1], GROUP_NAMES[0]])
     #then, for each instruction group, perform a t-test between left and right blocks
     for j, instr in enumerate([1,0]):
         left_values = longform[(longform['parameter']==param) & (longform['instructions']==instr) & (longform['block']=='Left')]['value']
