@@ -72,8 +72,7 @@ for w in windows:
         axes_grid[windows.index(w)], trials_df,
         group_col="instructions", group_values=[1, 0],
         palette={1: COLORS[GROUP_NAMES[0]], 0: COLORS[GROUP_NAMES[1]]},
-        labels={1: GROUP_NAMES[1], 0: GROUP_NAMES[0]},
-        title=f"Trials {w[0]}-{w[1]}",scatter=False
+        labels={1: GROUP_NAMES[0], 0: GROUP_NAMES[1]},         title=f"Trials {w[0]}-{w[1]}",scatter=False
     )
     grouped_df = trials_df.groupby(['subject','signed_contrast', 'instructions']).agg({'choice_right':'mean'}).reset_index()
     grouped_df['choice_right'] = grouped_df['choice_right']*100

@@ -101,7 +101,7 @@ data_high = data_high_contrast.groupby(['subject','instructions'])['correct'].me
 data_high['correct'] = data_high['correct']*100
 sns.stripplot(data=data_high, x='instructions', y='correct',
               hue='instructions', ax=axes[1], jitter=True, edgecolor='white', linewidth=0.5,
-              palette=[COLORS[GROUP_NAMES[1]],COLORS[GROUP_NAMES[1]]],
+              palette=[COLORS[GROUP_NAMES[1]],COLORS[GROUP_NAMES[0]]],
               zorder=1)
 sns.boxplot(data=data_high, x='instructions',y='correct',
             hue='instructions',ax=axes[1], saturation=0.5,
