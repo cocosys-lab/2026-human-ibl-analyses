@@ -3,17 +3,19 @@
 import matplotlib.pyplot as plt
 import seaborn as sns
 
+GROUP_NAMES = ['Instructed', 'Uninstructed'] # or Discovery
+
 EXAMPLE_SESSIONS = {
-    'instructions': 94, 
-    'no_instructions': 27 
+    GROUP_NAMES[0]: 94, # instructions
+    GROUP_NAMES[1]: 27 # no instructions
 }
 
 # Named colors, keyed for semantic use
 COLORS = {
     "left_block": "#5D3B92",
     "right_block": "#EF6528",
-    "instructions": "#3B6F92",
-    "no_instructions": "#FF9AE6",
+    GROUP_NAMES[0]: "#3B6F92", # instructions
+    GROUP_NAMES[1]: "#FF9AE6", # no instructions
     'correct': 'darkgreen',
     'incorrect': 'firebrick',
     'cursor_early_trial': 'yellow',
