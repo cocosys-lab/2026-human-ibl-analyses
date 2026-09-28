@@ -12,10 +12,10 @@ import seaborn as sns
 apply_style()
 
 #%% import data
-data = pd.read_csv("../../hivemind2025/data/processed_data.csv")
+data = pd.read_csv("../data/processed_data_2026.csv")
 data = TD.preprocess_trials(data)
-all_trials = pd.read_csv('../../hivemind2025/data/human_trials.csv')
-data['rt'] = all_trials['response_times_from_stim']
+# all_trials = pd.read_csv('../../hivemind2025/data/human_trials.csv')
+# data['rt'] = all_trials['response_times_from_stim']
 
 #%% fit psychometric curves for each subject and each block type
 subjects = data['subject'].unique()
@@ -62,7 +62,7 @@ psychometric_df['Absolute_bias_Left'] = np.abs(psychometric_df['bias_Left'])
 psychometric_df['Mean lapse'] = (psychometric_df['lapse_low'] + psychometric_df['lapse_high']) / 2
 psychometric_df['Mean_lapse_Right'] = (psychometric_df['lapse_low_Right'] + psychometric_df['lapse_high_Right']) / 2
 psychometric_df['Mean_lapse_Left'] = (psychometric_df['lapse_low_Left'] + psychometric_df['lapse_high_Left']) / 2
-psychometric_df[r'$\Delta$ Absolute bias'] = psychometric_df['Abolute_bias_Right'] - psychometric_df['Absolute_bias_Left']
+psychometric_df[r'$\Delta$ Absolute bias'] = psychometric_df['Absolute_bias_Right'] - psychometric_df['Absolute_bias_Left']
 psychometric_df[r'$\Delta$ Mean lapse'] = psychometric_df['Mean_lapse_Right'] - psychometric_df['Mean_lapse_Left']
 psychometric_df[r'$\Delta$ Slope'] = psychometric_df['slope_Right'] - psychometric_df['slope_Left']
 psychometric_df['Slope'] = psychometric_df['slope']
