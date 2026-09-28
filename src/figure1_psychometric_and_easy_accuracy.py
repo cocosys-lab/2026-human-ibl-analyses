@@ -92,6 +92,8 @@ sns.lineplot(data=grouped_df[grouped_df.instructions==0], x='signed_contrast', y
                 err_style='bars', linewidth=0, marker='o', markersize=5)
 
 axes[0].set_ylabel("P(right) (%)")
+handles, labels = axes[0].get_legend_handles_labels()
+axes[0].legend(handles[::-1], labels[::-1],  frameon=False)
 
 rng = np.random.default_rng(42)
 
@@ -101,7 +103,7 @@ data_high = data_high_contrast.groupby(['subject','instructions'])['correct'].me
 data_high['correct'] = data_high['correct']*100
 sns.stripplot(data=data_high, x='instructions', y='correct',
               hue='instructions', ax=axes[1], jitter=True, edgecolor='white', linewidth=0.5,
-              palette=[COLORS[GROUP_NAMES[1]],COLORS[GROUP_NAMES[1]]],
+              palette=[COLORS[GROUP_NAMES[1]],COLORS[GROUP_NAMES[0]]],
               zorder=1)
 sns.boxplot(data=data_high, x='instructions',y='correct',
             hue='instructions',ax=axes[1], saturation=0.5,
