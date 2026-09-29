@@ -3,7 +3,7 @@
 import sys
 import ast
 sys.path.append("..")
-from utils.plot_config import apply_style, COLORS, CONTRAST_PALETTE, EXAMPLE_SESSIONS
+from utils.plot_config import apply_style, COLORS, CONTRAST_PALETTE, EXAMPLE_SESSIONS, GROUP_NAMES
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 from matplotlib.colors import ListedColormap
@@ -19,6 +19,9 @@ import utils.form_psychometrics as P
 
 apply_style()
 
+name_ins = GROUP_NAMES[0]
+name_no = GROUP_NAMES[1]
+
 #%% import data
 
 data = pd.read_csv('../data/processed_data_2026.csv', converters={'cursorTime': ast.literal_eval, 
@@ -27,7 +30,7 @@ data = pd.read_csv('../data/processed_data_2026.csv', converters={'cursorTime': 
 data = TD.preprocess_trials(data)
 data = TD.transform_contrast_to_ix(data) #add contrast index for plotting
 
-contrast_level = 1. #None #1. # or None for all contrasts in wiggle plot
+contrast_level = 1. #1. # or None for all contrasts in wiggle plot
 
 #%% prepare cursor data
 
@@ -58,12 +61,12 @@ data['nanCursorPosition'] = [_traj_fill_in_nans(row[1]['cursorPosition_fromcentr
 
 #%% select example sessions
 
-ex_session_ins = data[data['subject']==EXAMPLE_SESSIONS['instructions']]
-ex_session_no = data[data['subject']==EXAMPLE_SESSIONS['no_instructions']]
+ex_session_ins = data[data['subject']==EXAMPLE_SESSIONS[name_ins]]
+ex_session_no = data[data['subject']==EXAMPLE_SESSIONS[name_no]]
 
 ex_data_dict = {}
-ex_data_dict['Instructed'] = {'data':ex_session_ins, 'col':COLORS['instructions']}
-ex_data_dict['Not instructed'] = {'data':ex_session_no, 'col':COLORS['no_instructions']}
+ex_data_dict[GROUP_NAMES[0]] = {'data':ex_session_ins, 'col':COLORS[name_ins]}
+ex_data_dict[GROUP_NAMES[1]] = {'data':ex_session_no, 'col':COLORS[name_no]}
 
 #%% create figure
 
@@ -79,7 +82,7 @@ fig, ax = plt.subplot_mosaic(fig_layout, figsize=(10,12), height_ratios=[0.125, 
 
 ### EXAMPLE SESSIONS - ROLLING RT
 ylims = (0.2, data['rt'].max()+0.1)
-for key, a in zip(ex_data_dict, [ax['A'], ax['B']]):
+for key, a in zip(ex_data_dict, [ax['B'], ax['A']]):
     d = ex_data_dict[key]['data']
 
     # rt scatterplot
@@ -100,11 +103,7 @@ for key, a in zip(ex_data_dict, [ax['A'], ax['B']]):
     a.set_yscale("log")
     a.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda y,pos:
         ('{{:.{:1d}f}}'.format(int(np.maximum(-np.log10(y),0)))).format(y)))
-    if key == 'Instructed':
-        key2 = 'instructions'
-    else:
-        key2 = 'no_instructions'
-    a.set_title(f'Participant {EXAMPLE_SESSIONS[key2]}: {key}', color=ex_data_dict[key]['col'])
+    a.set_title(f'Participant {EXAMPLE_SESSIONS[key]}: {key}', color=ex_data_dict[key]['col'])
     a.set_ylim(ylims)
 handles, labels = ax['A'].get_legend_handles_labels()
 # legend_a = 
@@ -114,17 +113,13 @@ ax['A'].get_legend().remove()
 
 ### MOUSE WIGGLES
 # whole session of cursor movements
-for key, a in zip(ex_data_dict, [ax['C'], ax['D']]):
+for key, a in zip(ex_data_dict, [ax['D'], ax['C']]):
     plot_all_session_trajectories(ex_data_dict[key]['data'], (COLORS['cursor_early_trial'], COLORS['cursor_late_trial']), ax=a, contrast_level=contrast_level)
-    if key == 'Instructed':
-        key2 = 'instructions'
-    else:
-        key2 = 'no_instructions'
-    a.set_title(f'Participant {EXAMPLE_SESSIONS[key2]}: {key}', color=ex_data_dict[key]['col'])
+    a.set_title(f'Participant {EXAMPLE_SESSIONS[key]}: {key}', color=ex_data_dict[key]['col'])
     if contrast_level:
-        a.set_title(f'Participant {EXAMPLE_SESSIONS[key2]}: {key}\nEasy trials', color=ex_data_dict[key]['col'])
+        a.set_title(f'Participant {EXAMPLE_SESSIONS[key]}: {key}\nHigh contrast trials', color=ex_data_dict[key]['col'])
     else:
-        a.set_title(f'Participant {EXAMPLE_SESSIONS[key2]}: {key}', color=ex_data_dict[key]['col'])
+        a.set_title(f'Participant {EXAMPLE_SESSIONS[key]}: {key}', color=ex_data_dict[key]['col'])
 ax['C'].get_legend().remove()
 ax['D'].legend(loc='center left', bbox_to_anchor=[1.02, 0.5], frameon=False)
 
@@ -132,37 +127,30 @@ ax['D'].legend(loc='center left', bbox_to_anchor=[1.02, 0.5], frameon=False)
 data_instructions = data[data['instructions']==1]
 data_no_instructions = data[data['instructions']==0]
 
-plot_mean_cursor_trajectories(data_instructions, 'cursorPositionNan', 'timeToResp', ax['E'], CONTRAST_PALETTE, (0,2), 'Time from stimulus onset (s)')
-plot_mean_cursor_trajectories(data_no_instructions, 'cursorPositionNan', 'timeToResp', ax['F'], CONTRAST_PALETTE, (0,2), 'Time from stimulus onset (s)')
+plot_mean_cursor_trajectories(data_instructions, 'cursorPositionNan', 'timeToResp', ax['F'], CONTRAST_PALETTE, (0,2), 'Time from stimulus onset (s)')
+plot_mean_cursor_trajectories(data_no_instructions, 'cursorPositionNan', 'timeToResp', ax['E'], CONTRAST_PALETTE, (0,2), 'Time from stimulus onset (s)')
 ax['E'].get_legend().remove()
 ax['F'].legend(loc='center left', bbox_to_anchor=[1.02, 0.5], frameon=False, title='Contrast (%)')
-ax['E'].set_title(f'All instructed participants', color=COLORS['instructions'])
-ax['F'].set_title(f'All not instructed participants', color=COLORS['no_instructions'])
+ax['F'].set_title(f'All {GROUP_NAMES[0]} participants', color=COLORS[GROUP_NAMES[0]])
+ax['E'].set_title(f'All {GROUP_NAMES[1]} participants', color=COLORS[GROUP_NAMES[1]])
 
 # # from response
-# plot_mean_cursor_trajectories(data_instructions, 'nanCursorPosition', 'timeFromResp', ax['I'], COLORS['instructions'], (-0.5,0), 'Time from response (s)')
-# plot_mean_cursor_trajectories(data_no_instructions, 'nanCursorPosition', 'timeFromResp', ax['J'], COLORS['no_instructions'], (-0.5,0), 'Time from response (s)')
+# plot_mean_cursor_trajectories(data_instructions, 'nanCursorPosition', 'timeFromResp', ax['I'], COLORS[name_ins], (-0.5,0), 'Time from response (s)')
+# plot_mean_cursor_trajectories(data_no_instructions, 'nanCursorPosition', 'timeFromResp', ax['J'], COLORS[name_no], (-0.5,0), 'Time from response (s)')
 # ax['I'].get_legend().remove()
 # ax['J'].get_legend().remove()
 
 ### MEDIAN RT AND RT VARIANCE
 # check functions in utils
-plot_median_rt(data[data['instructions']==1], ax['G'], label='Instructed', color=COLORS['instructions'])
-plot_median_rt(data[data['instructions']==0], ax['G'], label='Not instructed', color=COLORS['no_instructions'])
-plot_var_rt(data[data['instructions']==1], ax['H'], label='Instructed', color=COLORS['instructions'])
-plot_var_rt(data[data['instructions']==0], ax['H'], label='Not instructed', color=COLORS['no_instructions'])
+plot_median_rt(data[data['instructions']==1], ax['G'], label=GROUP_NAMES[0], color=COLORS[name_ins])
+plot_median_rt(data[data['instructions']==0], ax['G'], label=GROUP_NAMES[1], color=COLORS[name_no])
+plot_var_rt(data[data['instructions']==1], ax['H'], label=GROUP_NAMES[0], color=COLORS[name_ins])
+plot_var_rt(data[data['instructions']==0], ax['H'], label=GROUP_NAMES[1], color=COLORS[name_no])
 ax['G'].get_legend().remove()
-ax['H'].legend(loc='center left', bbox_to_anchor=[1.02, 0.5], frameon=False)
-fig.tight_layout()
+handles, labels = ax['H'].get_legend_handles_labels()
+ax['H'].legend(handles[::-1], labels[::-1], loc='center left', bbox_to_anchor=[1.02, 0.5], frameon=False)
 
-# make only the E/F row narrower to leave space for the legend on the right
-# _e_pos = ax['E'].get_position()
-# _f_pos = ax['F'].get_position()
-# _gap = _f_pos.x0 - _e_pos.x1
-# _shrink = 0.1
-# _scale = ((_e_pos.width + _f_pos.width) - _shrink) / (_e_pos.width + _f_pos.width)
-# ax['E'].set_position([_e_pos.x0, _e_pos.y0, _e_pos.width * _scale, _e_pos.height])
-# ax['F'].set_position([_e_pos.x0 + (_e_pos.width * _scale) + _gap, _f_pos.y0, _f_pos.width * _scale, _f_pos.height])
+fig.tight_layout()
 
 sns.despine(fig=fig)
 

@@ -1,6 +1,6 @@
 import sys
 sys.path.append("..")
-from utils.plot_config import apply_style, COLORS
+from utils.plot_config import apply_style, COLORS, GROUP_NAMES
 import matplotlib.pyplot as plt
 import seaborn as sns
 import pandas as pd
@@ -44,58 +44,60 @@ axes_grid = [fig.add_subplot(bottom_gs[r, c]) for r in range(3) for c in range(3
 data['rt_normalized'] = data.groupby('subject')['rt'].transform(lambda x: (x - x.min()) / (x.max()-x.min()))
 data = TD.transform_contrast_to_ix(data) #add contrast index for plotting
 plot_learning_curve(data[data.instructions==1], ax=axes_top[0], 
-                    color=COLORS['instructions'], 
-                    label='Instructed', errorbar='ci',
+                    color=COLORS[GROUP_NAMES[0]], 
+                    label=GROUP_NAMES[0], errorbar='ci',
                     x='trial', y='correct',
                     only_easy=False, smooth=True, smooth_window=50)
 plot_learning_curve(data[data.instructions==0], ax=axes_top[0],
-                    color=COLORS['no_instructions'], 
-                    label='Not Instructed', errorbar='ci',
+                    color=COLORS[GROUP_NAMES[1]], 
+                    label=GROUP_NAMES[1], errorbar='ci',
                     x='trial', y='correct',
                     only_easy=False, smooth=True, smooth_window=50)
 
 plot_learning_curve(data[data.instructions==1], ax=axes_top[1],
-                    color=COLORS['instructions'],
-                    label='Instructed', errorbar='ci',
+                    color=COLORS[GROUP_NAMES[0]],
+                    label=GROUP_NAMES[0], errorbar='ci',
                     x='trial', y='rt',
                     only_easy=False, smooth=True, smooth_window=50)
 plot_learning_curve(data[data.instructions==0], ax=axes_top[1],
-                    color=COLORS['no_instructions'],
-                    label='Not Instructed', errorbar='ci',
+                    color=COLORS[GROUP_NAMES[1]],
+                    label=GROUP_NAMES[1], errorbar='ci',
                     x='trial', y='rt',
                     only_easy=False, smooth=True, smooth_window=50)
 axes_top[1].set_ylabel('Response time (s)')
+
 for w in windows:
     trials_df = data[(data.trial>=w[0]) & (data.trial<w[1])]
     P.plot_panel_with_inset(
         axes_grid[windows.index(w)], trials_df,
         group_col="instructions", group_values=[1, 0],
-        palette={1: COLORS['instructions'], 0: COLORS['no_instructions']},
-        labels={1: "Instructed", 0: "Not Instructed"},
-        title=f"Trials {w[0]}-{w[1]}",scatter=False
+        palette={1: COLORS[GROUP_NAMES[0]], 0: COLORS[GROUP_NAMES[1]]},
+        labels={1: GROUP_NAMES[0], 0: GROUP_NAMES[1]},         title=f"Trials {w[0]}-{w[1]}",scatter=False
     )
     grouped_df = trials_df.groupby(['subject','signed_contrast', 'instructions']).agg({'choice_right':'mean'}).reset_index()
     grouped_df['choice_right'] = grouped_df['choice_right']*100
     sns.lineplot(data=grouped_df[grouped_df.instructions==1], x='signed_contrast', y='choice_right',
-                 ax=axes_grid[windows.index(w)], color=COLORS['instructions'], label='Instructed', errorbar='ci',
+                 ax=axes_grid[windows.index(w)], color=COLORS[GROUP_NAMES[0]], label=GROUP_NAMES[0], errorbar='ci',
                  err_style='bars', linewidth=0, marker='o', markersize=5)
     sns.lineplot(data=grouped_df[grouped_df.instructions==0], x='signed_contrast', y='choice_right',
-                 ax=axes_grid[windows.index(w)], color=COLORS['no_instructions'], label='Not Instructed', errorbar='ci',
+                 ax=axes_grid[windows.index(w)], color=COLORS[GROUP_NAMES[1]], label=GROUP_NAMES[1], errorbar='ci',
                  err_style='bars', linewidth=0, marker='o', markersize=5)
     axes_grid[windows.index(w)].set_ylabel("P(right) (%)")
     axes_grid[windows.index(w)].legend()
     
-    plot_median_rt(trials_df[trials_df.instructions==1],ax=axes_grid[3+windows.index(w)], 
-                   color=COLORS['instructions'], label='Instructed', errorbar='ci')
-    plot_median_rt(trials_df[trials_df.instructions==0],ax=axes_grid[3+windows.index(w)], 
-                   color=COLORS['no_instructions'], label='Not Instructed', errorbar='ci')
+    plot_median_rt(trials_df[trials_df.instructions==1],
+                   ax=axes_grid[3+windows.index(w)], 
+                   color=COLORS[GROUP_NAMES[0]], label=GROUP_NAMES[0], errorbar='ci')
+    plot_median_rt(trials_df[trials_df.instructions==0],        
+                   ax=axes_grid[3+windows.index(w)], 
+                   color=COLORS[GROUP_NAMES[1]], label=GROUP_NAMES[1], errorbar='ci')
     axes_grid[3+windows.index(w)].set_ylabel("Median RT (s)")
     axes_grid[3+windows.index(w)].legend()
     
     plot_var_rt(trials_df[trials_df.instructions==1],ax=axes_grid[6+windows.index(w)], 
-                color=COLORS['instructions'], label='Instructed', errorbar='ci')
+                color=COLORS[GROUP_NAMES[0]], label=GROUP_NAMES[0], errorbar='ci')
     plot_var_rt(trials_df[trials_df.instructions==0],ax=axes_grid[6+windows.index(w)], 
-                color=COLORS['no_instructions'], label='Not Instructed', errorbar='ci')
+                color=COLORS[GROUP_NAMES[1]], label=GROUP_NAMES[1], errorbar='ci')
     axes_grid[6+windows.index(w)].set_ylabel(r"Variance RT (s$^2$)")
     axes_grid[6+windows.index(w)].legend()
     
@@ -103,7 +105,9 @@ sns.despine(fig=fig)
 for x in axes_grid:
     x.get_legend().remove()
 axes_top[0].get_legend().remove()
-axes_top[1].legend(frameon=False)
+handles, labels = axes_top[1].get_legend_handles_labels()
+axes_top[1].legend(handles[::-1], labels[::-1], frameon=False)
+
 #bottom row is psychometrics, median rt and variance of rt at different time points
 #%%
 fig.savefig('../figures/figure4_all_trials.png', dpi=300, bbox_inches='tight')
