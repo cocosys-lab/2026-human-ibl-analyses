@@ -27,7 +27,7 @@ data = pd.read_csv('../data/processed_data_2026.csv', converters={'cursorTime': 
 data = TD.preprocess_trials(data)
 data = TD.transform_contrast_to_ix(data) #add contrast index for plotting
 
-contrast_level = None #1. # or None for all contrasts in wiggle plot
+contrast_level = 1. #None #1. # or None for all contrasts in wiggle plot
 
 #%% prepare cursor data
 

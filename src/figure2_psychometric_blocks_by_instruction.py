@@ -105,12 +105,13 @@ psychometric_df['Mean_lapse_Left'] = (psychometric_df['lapse_low_Left'] + psycho
 psychometric_df[r'$\Delta$ Absolute bias'] = psychometric_df['Absolute_bias_Right'] - psychometric_df['Absolute_bias_Left']
 psychometric_df[r'$\Delta$ Mean lapse'] = psychometric_df['Mean_lapse_Right'] - psychometric_df['Mean_lapse_Left']
 psychometric_df[r'$\Delta$ Slope'] = psychometric_df['slope_Right'] - psychometric_df['slope_Left']
+psychometric_df[r'$\Delta$ bias'] = psychometric_df['bias_Right'] - psychometric_df['bias_Left']
 psychometric_df['Slope'] = psychometric_df['slope']
 
 #and transform to longform for plotting
 longform = pd.melt(psychometric_df, 
                    id_vars=['subject', 'instructions'],
-                   value_vars=['Absolute_bias_Left', 'Absolute_bias_Right', 
+                   value_vars=['bias_Left', 'bias_Right', 
                                'Mean_lapse_Left', 'Mean_lapse_Right',
                                'lapse_low_Left', 'lapse_low_Right',
                                'lapse_high_Left', 'lapse_high_Right',
@@ -295,8 +296,8 @@ for extension in ["png", "svg"]:
         
 #%% and then parameter comparison at the bottom
 fig, ax = plt.subplots(1,4, figsize=(16,4)) #(20,5)
-param_names = ['Absolute_bias', 'lapse_low', 'lapse_high', 'slope']
-param_labels = ['Absolute bias', 'Lapse low', 'Lapse high', 'Slope']
+param_names = ['bias', 'lapse_low', 'lapse_high', 'slope']
+param_labels = ['Bias', 'Lapse low', 'Lapse high', 'Slope']
 for i,param in enumerate(param_names):
     g=sns.stripplot(x='instructions', y='value', hue='block', data=longform[longform['parameter']==param],
                   ax=ax[i], palette=[COLORS['left_block'], COLORS['right_block']],
@@ -313,7 +314,7 @@ for i,param in enumerate(param_names):
     ax[i].set_ylabel(param_labels[i])
     ax[i].set_xticklabels(['Not instructed', 'Instructed'])
     #then, for each instruction group, perform a t-test between left and right blocks
-    for j, instr in enumerate([1,0]):
+    for j, instr in enumerate([0,1]):
         left_values = longform[(longform['parameter']==param) & (longform['instructions']==instr) & (longform['block']=='Left')]['value']
         right_values = longform[(longform['parameter']==param) & (longform['instructions']==instr) & (longform['block']=='Right')]['value']
         test_res = ttest_rel(left_values, right_values, alternative='two-sided')
