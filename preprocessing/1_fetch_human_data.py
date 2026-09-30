@@ -1,3 +1,12 @@
+
+"""
+Load human trial and participant data from the J drive and save CSV files
+to this repository's data/ folder.
+
+Input: human_data_dir (path to the raw human data folder)
+Output: human_trials_table.csv; participants_info.csv
+
+"""
 #%%
 import pandas as pd
 import numpy as np
@@ -37,13 +46,17 @@ def load_human_session(human_data_dir: Path, subj: Path):
 
     data['subject'] = subject_id
     data['session'] = data['session'].astype(str)
-    if session_info[session_info['name']=='instructions']['value'].isna().all():
-        data['instructions'] = pd.NA
-    else:
-        data['instructions'] = int(float(session_info[session_info['name']=='instructions']['value'].values[0]))
+
+    instructions_value = get_info_value(session_info, 'instructions')
+    instructions = (
+        pd.NA if pd.isna(instructions_value)
+        else int(float(instructions_value))
+    )
+    data['instructions'] = instructions
 
     participant = {
         'subject': subject_id,
+        'instructions': instructions,
         'session_start': get_info_value(session_info, 'expStart'),
         'gender': get_selection(get_info_value(session_info, 'mouse_5.clicked_name')),
         'age': get_info_value(session_info, 'age_slider.response'),
@@ -118,6 +131,6 @@ participants_df.sort_values('subject', inplace=True)
 data_path = Path(__file__).resolve().parents[1] / 'data'
 data_path.mkdir(parents=True, exist_ok=True)
 
-trials_df.to_csv(data_path / 'human_trials_release.csv')
+trials_df.to_csv(data_path / 'human_trials_table.csv')
 participants_df.to_csv(data_path / 'participants_info.csv', index=False)
 print(f'Saved {trials_df.shape[0]} trials from {participants_df.shape[0]} participants')

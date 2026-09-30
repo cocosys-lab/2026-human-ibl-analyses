@@ -1,5 +1,8 @@
 """
-Input: human_trials_release.csv
+Process human trial data by recoding choices, rescaling contrasts,
+and formatting cursor trajectories.
+
+Input: human_trials_table.csv
 Output: processed_data_2026.csv
 
 """
@@ -12,7 +15,7 @@ from pathlib import Path
 data_path = Path(__file__).resolve().parents[1] / 'data'
 data_path.mkdir(parents=True, exist_ok=True)
 
-trials_df = pd.read_csv(data_path / 'human_trials_release.csv')
+trials_df = pd.read_csv(data_path / 'human_trials_table.csv')
 
 processed_df = trials_df.copy()
 
@@ -67,5 +70,3 @@ processed_df.rename(columns={'contLeft':'contrastLeft', 'contRight':'contrastRig
 
 # save csv
 processed_df.to_csv(data_path / 'processed_data_2026.csv', index=False)
-
-# %%
