@@ -280,9 +280,10 @@ axes[2].text(0.5, 0.95, annotation, transform=axes[2].transAxes, ha='center', va
 axes[2].plot([0.25, 0.75], [0.9, 0.9], transform=axes[2].transAxes, color='k', lw=1)
 print(f"---Statistical test for block-induced choice bias between instruction groups:\n"
       f"Uninstructed mean delta: {np.mean(uninstructed):.3f}, Instructed mean delta: {np.mean(instructed):.3f}\n"
-      f"t-test: t={stat_test.statistic:.3f}, p-value: {stat_test.pvalue:.4f}, d={(np.mean(uninstructed)-np.mean(instructed))/np.std(np.concatenate([uninstructed.values, instructed.values])):.3f}")
-# axes[2].legend([GROUP_NAMES[1], GROUP_NAMES[0]], frameon=False, loc='upper left', bbox_to_anchor=(1, 0.7))
-axes[2].get_legend().remove()
+      f"t-test: t={stat_test.statistic:.3f}, p-value: {stat_test.pvalue:.4f}, d={(np.mean(uninstructed)-np.mean(instructed))/np.std(np.concatenate([uninstructed.values, instructed.values])):.3f}"
+      f"df={stat_test.df}")
+axes[2].legend([GROUP_NAMES[1], GROUP_NAMES[0]], frameon=False, loc='upper left', bbox_to_anchor=(1, 0.7))
+# axes[2].get_legend().remove()
 axes[2].axhline(0, color="0.5", linewidth=1, linestyle="--")
 axes[2].set_xticks([0, 1], [GROUP_NAMES[1], GROUP_NAMES[0]])
 axes[2].set_ylabel(
@@ -332,7 +333,8 @@ for i,param in enumerate(param_names):
         test_res = ttest_rel(left_values, right_values, alternative='two-sided')
         print(f"---Parameter: {param}, Instruction: {instr},\n"
         f"Left values: {np.mean(left_values.values)}, Right values: {np.mean(right_values.values) }\n"
-        f"t-test: t={test_res.statistic:.3f}, p-value: {test_res.pvalue:.4f}, d={(np.mean(left_values.values)-np.mean(right_values.values))/np.std(np.concatenate([left_values.values, right_values.values])):.3f}")
+        f"t-test: t={test_res.statistic:.3f}, p-value: {test_res.pvalue:.4f}, d={(np.mean(left_values.values)-np.mean(right_values.values))/np.std(np.concatenate([left_values.values, right_values.values])):.3f}"
+        f"df={test_res.df}")
         annotation = '***' if test_res.pvalue < 0.001 else ('**' if test_res.pvalue < 0.01 else ('*'if test_res.pvalue < 0.05 else 'n.s.') )
         ax[i].text(j*0.5+.25, 0.95, annotation, transform=ax[i].transAxes, ha='center', va='top')
         ax[i].plot([j*0.5+0.15, j*0.5+0.35], [0.9, 0.9], transform=ax[i].transAxes, color='k', lw=1)

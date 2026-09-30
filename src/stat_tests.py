@@ -210,4 +210,54 @@ sns.despine(fig=fig)
 
 
 
-# %%
+# %% export statistical test results to csv
+from scipy import stats
+merged_df = pd.read_csv('../results/psychometrics.csv')
+params_of_interest = ['Absolute bias', 'Slope', 'Mean lapse', r'$\Delta$ bias', r'$\Delta$ lapse_low', r'$\Delta$ lapse_high', r'$\Delta$ Slope']
+merged_df[r'$\Delta$ lapse_high'] = (merged_df['lapse_high_Right']-merged_df['lapse_high_Left'])
+merged_df[r'$\Delta$ lapse_low'] = (merged_df['lapse_low_Right']-merged_df['lapse_low_Left'])
+def mean_ci(x, confidence=0.95):
+    """Return mean and 95% CI using the t distribution."""
+    x = pd.Series(x).dropna()
+    n = len(x)
+    mean = x.mean()
+    if n < 2:
+        return mean, np.nan, np.nan
+    sem = stats.sem(x)
+    margin = stats.t.ppf((1 + confidence) / 2, n - 1) * sem
+
+    return mean, mean - margin, mean + margin
+
+
+def format_mean_ci(x):
+    mean, low, high = mean_ci(x)
+    return f"{mean:.2f} [{low:.2f}, {high:.2f}]"
+
+rows = []
+for p in params_of_interest:
+    uninstructed = merged_df[merged_df['instructions'] == 0][p]
+    instructed = merged_df[merged_df['instructions'] == 1][p]
+    full_test = stats.ttest_ind(uninstructed, instructed, equal_var=False, nan_policy='omit')
+    t_stat = full_test.statistic
+    df_t = full_test.df
+    p_val = full_test.pvalue
+    d = cohen_d(uninstructed, instructed)
+    if p_val < 0.001:
+        p_string = "p < .001"
+    else:
+        p_string = f"p = {p_val:.3f}"
+    stat_test = (
+        f"t({df_t:.1f}) = {t_stat:.2f}, "
+        f"{p_string}, "
+        f"d = {d:.2f}"
+    )
+    rows.append({
+        'Parameter': p,
+        'Uninstructed': format_mean_ci(uninstructed),
+        'Instructed': format_mean_ci(instructed),
+        'stat test': stat_test
+    })
+    
+paper_table = pd.DataFrame(rows)
+paper_table.to_csv('../results/statistical_tests_psychometrics.csv', index=False)
+    
