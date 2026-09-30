@@ -15,7 +15,7 @@ import numpy as np
 import pandas as pd
 import psychofit as psy
 import seaborn as sns
-from scipy.stats import ttest_rel
+from scipy.stats import ttest_rel, ttest_ind
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 sys.path.append(str(REPO_ROOT))
@@ -58,6 +58,8 @@ instruction_colors = [
     COLORS[GROUP_NAMES[1]],
 ]
 
+np.random.seed(42)  # for reproducibility of jitter in stripplots and psych fits
+rng = np.random.default_rng(42)
 
 # %% Load and preprocess data
 data = pd.read_csv(DATA_PATH)
@@ -105,12 +107,13 @@ psychometric_df['Mean_lapse_Left'] = (psychometric_df['lapse_low_Left'] + psycho
 psychometric_df[r'$\Delta$ Absolute bias'] = psychometric_df['Absolute_bias_Right'] - psychometric_df['Absolute_bias_Left']
 psychometric_df[r'$\Delta$ Mean lapse'] = psychometric_df['Mean_lapse_Right'] - psychometric_df['Mean_lapse_Left']
 psychometric_df[r'$\Delta$ Slope'] = psychometric_df['slope_Right'] - psychometric_df['slope_Left']
+psychometric_df[r'$\Delta$ bias'] = psychometric_df['bias_Right'] - psychometric_df['bias_Left']
 psychometric_df['Slope'] = psychometric_df['slope']
 
 #and transform to longform for plotting
 longform = pd.melt(psychometric_df, 
                    id_vars=['subject', 'instructions'],
-                   value_vars=['Absolute_bias_Left', 'Absolute_bias_Right', 
+                   value_vars=['bias_Left', 'bias_Right', 
                                'Mean_lapse_Left', 'Mean_lapse_Right',
                                'lapse_low_Left', 'lapse_low_Right',
                                'lapse_high_Left', 'lapse_high_Right',
@@ -254,7 +257,6 @@ axes[1].set_ylabel("")
 axes[0].legend(frameon=False, loc="upper left")
 
 
-rng = np.random.default_rng(42)
 sns.stripplot(
     data=delta_data, x='instructions', y='delta_right', hue='instructions',
     ax=axes[2], palette=instruction_colors, hue_order=instruction_order,
@@ -269,8 +271,19 @@ sns.boxplot(
     palette=instruction_colors, zorder=0,
     ax=axes[2], saturation=0.7, dodge=False,
 )
-# axes[2].legend([GROUP_NAMES[1], GROUP_NAMES[0]], frameon=False, loc='upper left', bbox_to_anchor=(1, 0.7))
-axes[2].get_legend().remove()
+# represent the statistical test results on the third panel
+uninstructed = delta_data[delta_data['instructions']==0]['delta_right']
+instructed = delta_data[delta_data['instructions']==1]['delta_right']
+stat_test = ttest_ind(uninstructed, instructed, alternative='two-sided')
+annotation = '***' if stat_test.pvalue < 0.001 else ('**' if stat_test.pvalue < 0.01 else ('*'if stat_test.pvalue < 0.05 else 'n.s.') )
+axes[2].text(0.5, 0.95, annotation, transform=axes[2].transAxes, ha='center', va='top')
+axes[2].plot([0.25, 0.75], [0.9, 0.9], transform=axes[2].transAxes, color='k', lw=1)
+print(f"---Statistical test for block-induced choice bias between instruction groups:\n"
+      f"Uninstructed mean delta: {np.mean(uninstructed):.3f}, Instructed mean delta: {np.mean(instructed):.3f}\n"
+      f"t-test: t={stat_test.statistic:.3f}, p-value: {stat_test.pvalue:.4f}, d={(np.mean(uninstructed)-np.mean(instructed))/np.std(np.concatenate([uninstructed.values, instructed.values])):.3f}"
+      f"df={stat_test.df}")
+axes[2].legend([GROUP_NAMES[1], GROUP_NAMES[0]], frameon=False, loc='upper left', bbox_to_anchor=(1, 0.7))
+# axes[2].get_legend().remove()
 axes[2].axhline(0, color="0.5", linewidth=1, linestyle="--")
 axes[2].set_xticks([0, 1], [GROUP_NAMES[1], GROUP_NAMES[0]])
 axes[2].set_ylabel(
@@ -296,8 +309,8 @@ for extension in ["png", "svg"]:
         
 #%% and then parameter comparison at the bottom
 fig, ax = plt.subplots(1,4, figsize=(16,4)) #(20,5)
-param_names = ['Absolute_bias', 'lapse_low', 'lapse_high', 'slope']
-param_labels = ['Absolute bias', 'Lapse low', 'Lapse high', 'Slope']
+param_names = ['bias', 'lapse_low', 'lapse_high', 'slope']
+param_labels = ['Bias', 'Lapse low', 'Lapse high', 'Slope']
 for i,param in enumerate(param_names):
     g=sns.stripplot(x='instructions', y='value', hue='block', data=longform[longform['parameter']==param],
                   ax=ax[i], palette=[COLORS['left_block'], COLORS['right_block']],
@@ -314,10 +327,14 @@ for i,param in enumerate(param_names):
     ax[i].set_ylabel(param_labels[i])
     ax[i].set_xticklabels([GROUP_NAMES[1], GROUP_NAMES[0]])
     #then, for each instruction group, perform a t-test between left and right blocks
-    for j, instr in enumerate([1,0]):
+    for j, instr in enumerate([0,1]):
         left_values = longform[(longform['parameter']==param) & (longform['instructions']==instr) & (longform['block']=='Left')]['value']
         right_values = longform[(longform['parameter']==param) & (longform['instructions']==instr) & (longform['block']=='Right')]['value']
         test_res = ttest_rel(left_values, right_values, alternative='two-sided')
+        print(f"---Parameter: {param}, Instruction: {instr},\n"
+        f"Left values: {np.mean(left_values.values)}, Right values: {np.mean(right_values.values) }\n"
+        f"t-test: t={test_res.statistic:.3f}, p-value: {test_res.pvalue:.4f}, d={(np.mean(left_values.values)-np.mean(right_values.values))/np.std(np.concatenate([left_values.values, right_values.values])):.3f}"
+        f"df={test_res.df}")
         annotation = '***' if test_res.pvalue < 0.001 else ('**' if test_res.pvalue < 0.01 else ('*'if test_res.pvalue < 0.05 else 'n.s.') )
         ax[i].text(j*0.5+.25, 0.95, annotation, transform=ax[i].transAxes, ha='center', va='top')
         ax[i].plot([j*0.5+0.15, j*0.5+0.35], [0.9, 0.9], transform=ax[i].transAxes, color='k', lw=1)

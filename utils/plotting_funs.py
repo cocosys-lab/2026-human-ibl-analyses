@@ -19,7 +19,7 @@ def plot_median_rt(data, ax=None, color=None, label=None,
     ax.set_xticks([np.min(unique_contrast_ixs),np.median(unique_contrast_ixs), np.max(unique_contrast_ixs)], 
                     [np.min(unique_signed_contrasts), 0, np.max(unique_signed_contrasts)])
     ax.set_xlabel('Signed contrast (%)')
-    ax.set_ylabel('Median response time (s)')
+    ax.set_ylabel('Median RT (s)')
     
 def plot_var_rt(data, ax=None, color=None, label=None,
                 x='contrast_ix', y='rt', groupby=['subject','contrast_ix'],
@@ -38,7 +38,7 @@ def plot_var_rt(data, ax=None, color=None, label=None,
     ax.set_xticks([np.min(unique_contrast_ixs), np.median(unique_contrast_ixs), np.max(unique_contrast_ixs)], 
                     [np.min(unique_signed_contrasts), 0, np.max(unique_signed_contrasts)])
     ax.set_xlabel('Signed contrast (%)')
-    ax.set_ylabel('Variance of response time (s^2)')
+    ax.set_ylabel(r'Variance of RT (s$^2$)')
         
 def plot_learning_curve(data, ax=None, color=None, label=None,
                          x='trial', y='correct', groupby=['subject', 'trial'],
